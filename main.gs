@@ -1,4 +1,4 @@
-costumes "assets/FG/FGNG01A.png";
+costumes "assets/FG/*.png";
 
 
 %define NE_STAGE_WIDTH 480
@@ -30,6 +30,8 @@ onflag {
     NE_NAG_init;
 
     NE_RenderUtils_init;
+
+    NE_UTILS_initTime;
     
     layer = NE_Layer_new();
     
@@ -44,17 +46,34 @@ onflag {
         width: 480,
         height: 360;
 
-    NE_NAG_update;
-    GL_clearStage;
-    NE_Layer_renderLayer layer;
-
     NE_NAG_Image 
         id: "bg",
         layer: layer,
-        page: "fore",
-        alpha: 0.5;
+        page: "back",
+        storage: "FGNG01B",
+        originWidth: 1280,
+        originHeight: 960,
+        alpha: 1.0,
+        width: 480,
+        height: 360;
+    
+    NE_NAG_PageTransform
+        layerIndex: layer,
+        time: 1000;
 
-    NE_NAG_update;
-    GL_clearStage;
-    NE_Layer_renderLayer layer;
+    NE_NAG_Wait
+        time: 1000;
+
+    NE_NAG_PageTransform
+        layerIndex: layer,
+        time: 1000;
+
+    forever {
+        NE_Utils_updateDeltaTime;
+        NE_NAG_update;
+        NE_Layer_PageTransform_updateAll;
+        
+        GL_clearStage;
+        NE_Layer_renderLayer layer;
+    }
 }

@@ -3,6 +3,8 @@
 
 %include libs/ComponentInfo.gs
 
+%include libs/Utils.gs
+
 # LinkList
 
 %define NE_LINKLIST_NULL 0
@@ -140,7 +142,7 @@ struct NE_Layer {
     width = 0, height = 0,
     foreOpacity = 1.0,
     foreChildList = 0,
-    backOpacity = 1.0,
+    backOpacity = 0.0,
     backChildList = 0
 }
 
@@ -150,6 +152,7 @@ list NE_Layer_list_free = [];
 proc NE_Layer_init {
     delete NE_Layer_list_free;
     delete NE_Layer_list;
+    NE_Layer_PageTransform_init;
 }
 
 func NE_Layer_new () {
@@ -259,6 +262,21 @@ func NE_Layer_findComponentInfo(layerIndex, page, componentId) {
 }
 
 proc NE_Layer_renderLayer layerIndex {
+    # 背景
+    if (NE_Layer_list[$layerIndex].backOpacity > 0) {
+        NE_RenderInfo_Stack_push;
+        NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x = NE_Layer_list[$layerIndex].x;
+        NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y = NE_Layer_list[$layerIndex].y;
+        NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha = NE_Layer_list[$layerIndex].backOpacity;
+        local p = NE_LinkList_list[NE_Layer_list[$layerIndex].backChildList].head;
+        until (p == NE_LINKLIST_NULL) {
+            NE_ComponentInfo_render NE_LinkListNode_list[p].data;
+            p = NE_LinkListNode_list[p].next;
+        }
+        NE_RenderInfo_Stack_pop;
+    }
+
+    # 前景
     NE_RenderInfo_Stack_push;
     NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x = NE_Layer_list[$layerIndex].x;
     NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y = NE_Layer_list[$layerIndex].y;
@@ -269,6 +287,107 @@ proc NE_Layer_renderLayer layerIndex {
         p = NE_LinkListNode_list[p].next;
     }
     NE_RenderInfo_Stack_pop;
+}
+
+# Transform
+
+struct NE_Layer_PageTransform {
+    layerIndex,
+    startTime,
+    time,
+    completed = 0,
+    running = 0
+};
+
+list NE_Layer_PageTransform NE_Layer_PageTransform_list = [];
+list NE_Layer_PageTransform_list_free = [];
+list NE_Layer_PageTransform_needUpdate = [];
+
+proc NE_Layer_PageTransform_init {
+    delete NE_Layer_PageTransform_list;
+    delete NE_Layer_PageTransform_list_free;
+    delete NE_Layer_PageTransform_needUpdate;
+}
+
+func NE_Layer_PageTransform_new(
+    layerIndex,
+    time,
+    offset = 0
+) {
+
+    local startTime = NE_UTILS_CURRENT_TIME + $offset;
+
+    local index = 0;
+    if (length(NE_Layer_PageTransform_list_free) > 0) {
+        index = NE_Layer_PageTransform_list_free[1];
+        NE_Layer_PageTransform_list[index].layerIndex = $layerIndex;
+        NE_Layer_PageTransform_list[index].startTime = startTime;
+        NE_Layer_PageTransform_list[index].time = $time;
+        NE_Layer_PageTransform_list[index].completed = 0;
+        NE_Layer_PageTransform_list[index].running = 0;
+        delete NE_Layer_PageTransform_list_free[1];
+    } else {
+        add NE_Layer_PageTransform{
+            layerIndex: $layerIndex,
+            startTime: startTime,
+            time: $time
+        } to NE_Layer_PageTransform_list;
+        index = length(NE_Layer_PageTransform_list);
+    }
+    add index to NE_Layer_PageTransform_needUpdate;
+    return index;
+}
+
+proc NE_Layer_PageTransform_free index {
+    add $index to NE_Layer_PageTransform_list_free;
+}
+
+proc NE_Layer_PageTransform_updateAll {
+    local currentTime = NE_UTILS_CURRENT_TIME;
+    local p = 1;
+    until (p > length(NE_Layer_PageTransform_needUpdate)) {
+        local index = NE_Layer_PageTransform_needUpdate[p];
+        local NE_Layer_PageTransform transform = NE_Layer_PageTransform_list[index];
+        if (transform.completed != 0) {
+            NE_Layer_PageTransform_free index;
+            delete NE_Layer_PageTransform_needUpdate[p];
+        } else {
+            local t = (currentTime - transform.startTime) / transform.time;
+            if (t >= 0) {
+                if (t >= 1) {
+                    NE_Layer_list[index].backOpacity = 0;
+                    NE_Layer_PageTransform_list[index].completed = 1;
+                }
+
+                # transform 开始时需要特殊处理
+                if (transform.running == 0) {
+                    NE_Layer_PageTransform_list[index].running = 1;
+                    local layerIndex = transform.layerIndex;
+
+                    # 先设置好可见度
+                    NE_Layer_list[layerIndex].foreOpacity = 0.0;
+                    NE_Layer_list[layerIndex].backOpacity = 1.0;
+
+                    # 替换前景和背景
+                    local temp = NE_Layer_list[layerIndex].foreChildList;
+                    NE_Layer_list[layerIndex].foreChildList = NE_Layer_list[layerIndex].backChildList;
+                    NE_Layer_list[layerIndex].backChildList = temp;
+                }
+                
+                local progress = NE_Layer_PageTransform_linear(0, 1, t);
+                NE_Layer_list[layerIndex].foreOpacity = progress;
+            }
+            p += 1;
+        }
+    }
+}
+
+func NE_Layer_PageTransform_linear (start, diff, t) {
+    if ($t > 1) {
+        return $start + $diff;
+    } else {
+        return $start + $diff * $t;
+    }
 }
 
 %endif

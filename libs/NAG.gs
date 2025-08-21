@@ -109,7 +109,7 @@ proc NE_NAG_Common_mod infoIndex, nagIndex {
     }
 }
 
-proc NE_NAG_Image_modOrNew nagIndex {
+func NE_NAG_Image_modOrNew(nagIndex) {
     local id = NE_NAG_COMMON_ID($nagIndex);
     local layer = NE_NAG_COMMON_LAYER($nagIndex);
     local page = NE_NAG_COMMON_PAGE($nagIndex);
@@ -144,20 +144,98 @@ proc NE_NAG_Image_modOrNew nagIndex {
         }
         NE_NAG_Common_mod infoIndex, $nagIndex;
     }
+    return 0;
 }
 
+# PageTransform
+
+%define NE_NAG_TRANSFORM_LAYER_INDEX(index) NE_NAG_list[index + 1]
+%define NE_NAG_TRANSFORM_OFFSET(index) NE_NAG_list[index + 2]
+%define NE_NAG_TRANSFORM_TIME(index) NE_NAG_list[index + 3]
+%define NE_NAG_TRANSFORM_SIZE 4
+
+proc NE_NAG_PageTransform
+    layerIndex, offset = 0, time
+{
+    local index = length(NE_NAG_list) + 1;
+    repeat (NE_NAG_TRANSFORM_SIZE) {
+        add 0 to NE_NAG_list;
+    }
+    NE_NAG_COMMON_TYPE(index) = "trans";
+    NE_NAG_TRANSFORM_LAYER_INDEX(index) = $layerIndex;
+    NE_NAG_TRANSFORM_OFFSET(index) = $offset;
+    NE_NAG_TRANSFORM_TIME(index) = $time;
+}
+
+func NE_NAG_PageTransform_new(nagIndex) {
+    local empty = NE_Layer_PageTransform_new(
+        layerIndex: NE_NAG_TRANSFORM_LAYER_INDEX($nagIndex),
+        time: NE_NAG_TRANSFORM_TIME($nagIndex),
+        offset: NE_NAG_TRANSFORM_OFFSET($nagIndex)
+    );
+    return 0;
+}
+
+# Wait
+
+%define NE_NAG_WAIT_TIME(index) NE_NAG_list[index + 1]
+%define NE_NAG_WAIT_SIZE 2
+
+var NE_WAIT_TIME = -1;
+
+proc NE_Wait_init {
+    NE_WAIT_TIME = -1;
+}
+
+proc NE_NAG_Wait
+    time
+{
+    local index = length(NE_NAG_list) + 1;
+    repeat (NE_NAG_WAIT_SIZE) {
+        add 0 to NE_NAG_list;
+    }
+    NE_NAG_COMMON_TYPE(index) = "wait";
+    NE_NAG_WAIT_TIME(index) = $time;
+}
+
+func NE_NAG_Wait_newOrCheck(nagIndex) {
+    if (NE_WAIT_TIME < 0) {
+        NE_WAIT_TIME = NE_UTILS_CURRENT_TIME + NE_NAG_WAIT_TIME($nagIndex);
+        return 1;
+    } elif (NE_UTILS_CURRENT_TIME >= NE_WAIT_TIME) {
+        NE_WAIT_TIME = -1;
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+
+# NAG
 var NE_NAG_pointer = 0;
 
 proc NE_NAG_init {
     delete NE_NAG_list;
     NE_NAG_pointer = 1;
+    NE_Wait_init;
 }
 
 proc NE_NAG_update {
-    local type = NE_NAG_COMMON_TYPE(NE_NAG_pointer);
-    if (type == "image") {
-        NE_NAG_Image_modOrNew(NE_NAG_pointer);
-        NE_NAG_pointer += NE_NAG_IMAGE_SIZE;
+    local block = 0;
+    until (NE_NAG_pointer > length(NE_NAG_list) or block != 0) {
+        local type = NE_NAG_COMMON_TYPE(NE_NAG_pointer);
+        if (type == "image") {
+            block = NE_NAG_Image_modOrNew(NE_NAG_pointer);
+            NE_NAG_pointer += NE_NAG_IMAGE_SIZE;
+        } elif (type == "trans") {
+            block = NE_NAG_PageTransform_new(NE_NAG_pointer);
+            NE_NAG_pointer += NE_NAG_TRANSFORM_SIZE;
+        } elif (type == "wait") {
+            block = NE_NAG_Wait_newOrCheck(NE_NAG_pointer);
+            if (block == 0) {
+                NE_NAG_pointer += NE_NAG_WAIT_SIZE;
+            }
+        }
     }
 }
 
