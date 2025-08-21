@@ -1,8 +1,6 @@
 %if not NE_COMPONENT_INFO
 %define NE_COMPONENT_INFO
 
-%include libs/Component.gs
-
 list NE_ComponentInfo_list = [];
 list NE_ComponentInfo_list_free = [];
 
@@ -20,6 +18,10 @@ list NE_ComponentInfo_list_free = [];
 %define NE_COMPONENT_INFO_ROTATION(index) NE_ComponentInfo_list[index + 9]
 
 %define NE_COMPONENT_INFO_SIZE 10
+
+%include libs/Component.gs
+
+%include libs/RenderUtils.gs
 
 proc NE_ComponentInfo_init {
     delete NE_ComponentInfo_list;
@@ -51,7 +53,7 @@ proc NE_ComponentInfo_free index {
 
 func NE_ComponentInfo_copy(index) {
     local type = NE_COMPONENT_INFO_TYPE($index);
-    return NE_ComponentInfo_new(
+    local newIndex = NE_ComponentInfo_new(
         NE_COMPONENT_INFO_ID($index),
         type,
         NE_Component_copy(
@@ -59,6 +61,20 @@ func NE_ComponentInfo_copy(index) {
             NE_COMPONENT_INFO_INDEX($index)
         )
     );
+
+    NE_COMPONENT_INFO_X(newIndex) = NE_COMPONENT_INFO_X($index);
+    NE_COMPONENT_INFO_Y(newIndex) = NE_COMPONENT_INFO_Y($index);
+    NE_COMPONENT_INFO_WIDTH(newIndex) = NE_COMPONENT_INFO_WIDTH($index);
+    NE_COMPONENT_INFO_HEIGHT(newIndex) = NE_COMPONENT_INFO_HEIGHT($index);
+    NE_COMPONENT_INFO_COLOR(newIndex) = NE_COMPONENT_INFO_COLOR($index);
+    NE_COMPONENT_INFO_ALPHA(newIndex) = NE_COMPONENT_INFO_ALPHA($index);
+    NE_COMPONENT_INFO_ROTATION(newIndex) = NE_COMPONENT_INFO_ROTATION($index);
+
+    return newIndex;
+}
+
+proc NE_ComponentInfo_render infoIndex {
+    NE_Component_render NE_COMPONENT_INFO_TYPE($infoIndex), $infoIndex, NE_COMPONENT_INFO_INDEX($infoIndex);
 }
 
 %endif

@@ -1,6 +1,12 @@
 %if not NE_COMPONENT
 %define NE_COMPONENT
 
+%include libs/GL.gs
+
+%include libs/ComponentInfo.gs
+
+%include libs/RenderUtils.gs
+
 # Image
 
 struct NE_Component_Image {
@@ -45,6 +51,27 @@ func NE_Component_Image_copy(index) {
     );
 }
 
+proc NE_Component_Image_render infoIndex, componentIndexIndex {
+    local x = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x + NE_COMPONENT_INFO_X($infoIndex);
+    local y = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y + NE_COMPONENT_INFO_Y($infoIndex);
+    local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha * NE_COMPONENT_INFO_ALPHA($infoIndex);
+    local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation + NE_COMPONENT_INFO_ROTATION($infoIndex);
+    GL_setShaderAlpha alpha;
+    
+    GL_bindTexture 
+        NE_Component_Image_list[$componentIndexIndex].storage,
+        NE_Component_Image_list[$componentIndexIndex].originWidth,
+        NE_Component_Image_list[$componentIndexIndex].originHeight;
+
+    GL_draw2dTextureToStage
+        x,
+        y,
+        NE_COMPONENT_INFO_WIDTH($infoIndex),
+        NE_COMPONENT_INFO_HEIGHT($infoIndex),
+        rotation;
+
+}
+
 # Text
 
 # Common
@@ -63,5 +90,11 @@ func NE_Component_copy (type, index) {
         return NE_Component_Image_copy($index);
     }
 }
+
+proc NE_Component_render type, infoIndex, componentIndex {
+    if ($type == "image") {
+        NE_Component_Image_render $infoIndex, $componentIndex;
+    }
+} 
 
 %endif

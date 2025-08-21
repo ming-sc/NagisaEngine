@@ -11,7 +11,7 @@ costumes "assets/FG/FGNG01A.png";
 
 %include libs/Utils.gs
 
-%include libs/Layer.gs
+%include libs/NAG.gs
 
 hide;
 
@@ -26,4 +26,35 @@ onflag {
 
     NE_ComponentInfo_init;
     NE_Component_init;
+
+    NE_NAG_init;
+
+    NE_RenderUtils_init;
+    
+    layer = NE_Layer_new();
+    
+    NE_NAG_Image 
+        id: "bg",
+        layer: layer,
+        page: "fore",
+        storage: "FGNG01A",
+        originWidth: 1280,
+        originHeight: 960,
+        alpha: 1.0,
+        width: 480,
+        height: 360;
+
+    NE_NAG_update;
+    GL_clearStage;
+    NE_Layer_renderLayer layer;
+
+    NE_NAG_Image 
+        id: "bg",
+        layer: layer,
+        page: "fore",
+        alpha: 0.5;
+
+    NE_NAG_update;
+    GL_clearStage;
+    NE_Layer_renderLayer layer;
 }

@@ -28,7 +28,7 @@ proc GL_bindTexture textureName, width, height {
 }
 
 proc GL_setShaderAlpha alpha {
-    GL_SHADER_ALPHA = alpha;
+    GL_SHADER_ALPHA = $alpha;
 }
 
 proc GL_draw2dTextureToStage x, y, width, height, rotation {
