@@ -34,7 +34,7 @@ func NE_Component_Image_new (storage, originWidth, originHeight) {
     return index;
 }
 
-proc NEComponent_Image_free index {
+proc NE_Component_Image_free index {
     add $index to NE_Component_Image_list_free;
 }
 
@@ -74,14 +74,77 @@ proc NE_Component_Image_render infoIndex, componentIndexIndex {
 
 # Text
 
+struct NE_Component_Text {
+    text,
+    size = 30,
+    color = 0,
+    startTime = 0,
+    totalTime = 0,
+    lineHeight = 1,
+    letterSpacing = 1
+}
+
+list NE_Component_Text NE_Component_Text_list = [];
+list NE_Component_Text_list_free = [];
+
+func NE_Component_Text_new (
+    text
+) {
+    local index = 0;
+    if (length(NE_Component_Text_list_free) > 0) {
+        index = NE_Component_Text_list_free[1];
+        delete NE_Component_Text_list_free[1];
+    } else {
+        add NE_Component_Text {} to NE_Component_Text_list;
+        index = length(NE_Component_Text_list);
+    }
+    NE_Component_Text_list[index] = NE_Component_Text {
+        text: $text,
+        size: 30,
+        color: 0,
+        startTime: 0,
+        totalTime: 0,
+        lineHeight: 1,
+        letterSpacing: 1
+    };
+    return index;
+}
+
+proc NE_Component_Text_free index {
+    add $index to NE_Component_Text_list_free;
+}
+
+
+proc NE_Component_Text_init {
+    delete NE_Component_Text_list;
+    delete NE_Component_Text_list_free;
+}
+
+func NE_Component_Text_copy(index) {
+    local newIndex = NE_Component_Text_new(
+        NE_Component_Text_list[$index].text
+    );
+    NE_Component_Text_list[newIndex] = NE_Component_Text_list[$index];
+    return newIndex;
+}
+
+proc NE_Component_Text_render infoIndex, componentIndexIndex {
+    # TODO: Implement text rendering
+}
+
+
 # Common
 proc NE_Component_init {
     NE_Component_Image_init;
+    NE_Component_Text_init;
 }
 
 proc NE_Component_free type, index {
     if ($type == "image") {
-        NEComponent_Image_free $index;
+        NE_Component_Image_free $index;
+    }
+    elif ($type == "text") {
+        NE_Component_Text_free $index;
     }
 }
 
@@ -89,12 +152,18 @@ func NE_Component_copy (type, index) {
     if ($type == "image") {
         return NE_Component_Image_copy($index);
     }
+    elif ($type == "text") {
+        return NE_Component_Text_copy($index);
+    }
 }
 
 proc NE_Component_render type, infoIndex, componentIndex {
     if ($type == "image") {
         NE_Component_Image_render $infoIndex, $componentIndex;
     }
-} 
+    elif ($type == "text") {
+        NE_Component_Text_render $infoIndex, $componentIndex;
+    }
+}
 
 %endif

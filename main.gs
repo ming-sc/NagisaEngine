@@ -62,7 +62,26 @@ onflag {
         time: 1000;
 
     NE_NAG_Wait
+        time: 2000;
+
+    NE_NAG_Image
+        id: "bg",
+        layer: layer,
+        page: "back",
+        storage: "FGNG01C";
+
+    NE_NAG_PageTransform
+        layerIndex: layer,
         time: 1000;
+
+    NE_NAG_Wait
+        time: 2000;
+
+    NE_NAG_Image
+        id: "bg",
+        layer: layer,
+        page: "back",
+        storage: "FGNG01D";
 
     NE_NAG_PageTransform
         layerIndex: layer,
