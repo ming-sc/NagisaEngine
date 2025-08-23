@@ -356,6 +356,80 @@ func NE_NAG_Text_modOrNew(nagIndex) {
     return 0;
 }
 
+# Action
+# 取 Common 中的 type
+%define NE_NAG_ACTION_COMPONENT_ID(index) NE_NAG_list[index + 1]
+%define NE_NAG_ACTION_LAYER(index) NE_NAG_list[index + 2]
+%define NE_NAG_ACTION_PAGE(index) NE_NAG_list[index + 3]
+
+%define NE_NAG_ACTION_EASING(index) NE_NAG_list[index + 4]
+%define NE_NAG_ACTION_OFFSET(index) NE_NAG_list[index + 5]
+%define NE_NAG_ACTION_DURATION(index) NE_NAG_list[index + 6]
+%define NE_NAG_ACTION_RELATIVE_INDEX(index) NE_NAG_list[index + 7]
+%define NE_NAG_ACTION_START(index) NE_NAG_list[index + 8]
+%define NE_NAG_ACTION_DIFF(index) NE_NAG_list[index + 9]
+
+%define NE_NAG_ACTION_SIZE 10
+
+proc NE_NAG_Action
+    id,
+    layer, page,
+    easing,
+    offset = 0,
+    duration,
+    relativeIndex,
+    start,
+    diff = "",
+    target = ""
+{
+    local index = length(NE_NAG_list) + 1;
+    repeat (NE_NAG_ACTION_SIZE) {
+        add 0 to NE_NAG_list;
+    }
+    local diff = 0;
+    if ($diff != "") {
+        diff = $diff;
+    }
+    # 如果有 target 则使用 target, target 优先级高于 diff
+    if ($target != "") {
+        diff = $target - $start;
+    }
+
+    NE_NAG_COMMON_TYPE(index) = "action";
+
+    NE_NAG_ACTION_COMPONENT_ID(index) = $id;
+    NE_NAG_ACTION_LAYER(index) = $layer;
+    NE_NAG_ACTION_PAGE(index) = $page;
+    NE_NAG_ACTION_EASING(index) = $easing;
+    NE_NAG_ACTION_OFFSET(index) = $offset;
+    NE_NAG_ACTION_DURATION(index) = $duration;
+    NE_NAG_ACTION_RELATIVE_INDEX(index) = $relativeIndex;
+    NE_NAG_ACTION_START(index) = $start;
+    NE_NAG_ACTION_DIFF(index) = diff;
+}
+
+func NE_NAG_Action_new(nagIndex){
+    local id = NE_NAG_ACTION_COMPONENT_ID($nagIndex);
+    local layer = NE_NAG_ACTION_LAYER($nagIndex);
+    local page = NE_NAG_ACTION_PAGE($nagIndex);
+    
+    # 用 id 查找组件
+    local nodeIndex = NE_Layer_findComponentInfo(layer, page, id);
+    if (nodeIndex != NE_LINKLIST_NULL) {
+        local infoIndex = NE_LinkListNode_list[nodeIndex].data;
+        local action = NE_Action_new(
+            NE_NAG_ACTION_EASING($nagIndex),
+            NE_UTILS_CURRENT_TIME + NE_NAG_ACTION_OFFSET($nagIndex),
+            NE_NAG_ACTION_DURATION($nagIndex),
+            infoIndex + NE_NAG_ACTION_RELATIVE_INDEX($nagIndex),
+            NE_NAG_ACTION_START($nagIndex),
+            NE_NAG_ACTION_DIFF($nagIndex)
+        );
+    }
+
+    return 0;
+}
+
 # NAG
 var NE_NAG_pointer = 0;
 
@@ -379,6 +453,9 @@ proc NE_NAG_update {
         } elif (type == "trans") {
             block = NE_NAG_PageTransform_new(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_TRANSFORM_SIZE;
+        } elif(type == "action") {
+            block = NE_NAG_Action_new(NE_NAG_pointer);
+            NE_NAG_pointer += NE_NAG_ACTION_SIZE;
         } elif (type == "wait") {
             block = NE_NAG_Wait_newOrCheck(NE_NAG_pointer);
             if (block == 0) {

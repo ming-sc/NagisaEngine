@@ -168,6 +168,23 @@ proc NE_Component_Text_render infoIndex, componentIndexIndex {
     local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha * NE_COMPONENT_INFO_ALPHA($infoIndex);
     local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation + NE_COMPONENT_INFO_ROTATION($infoIndex);
     GL_setShaderAlpha alpha;
+
+    # 绘制阴影
+    GL_setShaderColor 0;
+    GL_drawMultiLineTextToStage
+        x + 1,
+        y + 1,
+        NE_COMPONENT_INFO_WIDTH($infoIndex),
+        NE_COMPONENT_INFO_HEIGHT($infoIndex),
+        rotation,
+        NE_Component_Text_list[$componentIndexIndex].text,
+        NE_Component_Text_list[$componentIndexIndex].size,
+        NE_Component_Text_list[$componentIndexIndex].lineHeight,
+        NE_Component_Text_list[$componentIndexIndex].letterSpacing,
+        NE_Component_Text_list[$componentIndexIndex].italic,
+        NE_Component_Text_list[$componentIndexIndex].weight,
+        NE_COMPONENT_INFO_VALUE($infoIndex);
+
     GL_setShaderColor NE_COMPONENT_INFO_COLOR($infoIndex);
 
     GL_drawMultiLineTextToStage

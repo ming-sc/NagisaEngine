@@ -94,14 +94,42 @@ onflag {
 
     messageLayer = NE_Layer_new();
 
+    NE_NAG_Image
+        id: "message_bg",
+        layer: messageLayer,
+        page: "fore",
+        storage: "SMW00B3",
+        originWidth: 1280,
+        originHeight: 200,
+        alpha: 0,
+        width: 480,
+        height: 75,
+        x: 0,
+        y: 280;
+
+    NE_NAG_Action
+        id: "message_bg",
+        layer: messageLayer,
+        page: "fore",
+        easing: "const",
+        duration: 700,
+        relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX,
+        start: 0,
+        target: 0.4;
+
+    NE_NAG_Wait
+        time: 1000;
+
     NE_NAG_Text
         id: "message",
         layer: messageLayer,
         page: "fore",
-        text: "Hello, World! こんにちは、世界！你好，世界！",
+        text: "「Hello, World! こんにちは、世界！你好，世界！」",
         x: 40,
-        y: 40,
-        width: 400;
+        y: 290,
+        width: 400,
+        fontSize: 25,
+        color: "#FFFFFF";
 
     NE_NAG_Wait
         time: 2000;
@@ -110,7 +138,7 @@ onflag {
         id: "message",
         layer: messageLayer,
         page: "fore",
-        text: "如果您愿意的话，让我带您去吧，这座小镇，愿望实现的地方……";
+        text: "「如果您愿意的话，让我带您去吧，这座小镇，愿望实现的地方……」";
 
     forever {
         NE_Utils_updateDeltaTime;
