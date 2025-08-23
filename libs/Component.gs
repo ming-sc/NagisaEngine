@@ -1,11 +1,13 @@
 %if not NE_COMPONENT
 %define NE_COMPONENT
 
-%include libs/GL.gs
-
 %include libs/ComponentInfo.gs
 
 %include libs/RenderUtils.gs
+
+%include libs/GL.gs
+
+%include libs/font/Font.gs
 
 # Image
 
@@ -57,6 +59,7 @@ proc NE_Component_Image_render infoIndex, componentIndexIndex {
     local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha * NE_COMPONENT_INFO_ALPHA($infoIndex);
     local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation + NE_COMPONENT_INFO_ROTATION($infoIndex);
     GL_setShaderAlpha alpha;
+    GL_setShaderColor NE_COMPONENT_INFO_COLOR($infoIndex);
     
     GL_bindTexture 
         NE_Component_Image_list[$componentIndexIndex].storage,
@@ -75,20 +78,28 @@ proc NE_Component_Image_render infoIndex, componentIndexIndex {
 # Text
 
 struct NE_Component_Text {
-    text,
+    text = "",
     size = 30,
-    color = 0,
     startTime = 0,
     totalTime = 0,
     lineHeight = 1,
-    letterSpacing = 1
+    letterSpacing = 1,
+    italic = 0,
+    weight = 0
 }
 
 list NE_Component_Text NE_Component_Text_list = [];
 list NE_Component_Text_list_free = [];
 
 func NE_Component_Text_new (
-    text
+    text,
+    size,
+    startTime,
+    totalTime,
+    lineHeight,
+    letterSpacing,
+    italic,
+    weight
 ) {
     local index = 0;
     if (length(NE_Component_Text_list_free) > 0) {
@@ -98,14 +109,30 @@ func NE_Component_Text_new (
         add NE_Component_Text {} to NE_Component_Text_list;
         index = length(NE_Component_Text_list);
     }
+    local letterSpacing = $letterSpacing;
+    if (letterSpacing == "") {
+        letterSpacing = 1;
+    }
+    
+    local size = $size;
+    if (size == "") {
+        size = 30;
+    }
+
+    local lineHeight = $lineHeight;
+    if (lineHeight == "") {
+        lineHeight = 1;
+    }
+
     NE_Component_Text_list[index] = NE_Component_Text {
         text: $text,
-        size: 30,
-        color: 0,
-        startTime: 0,
-        totalTime: 0,
-        lineHeight: 1,
-        letterSpacing: 1
+        size: size,
+        startTime: $startTime,
+        totalTime: $totalTime,
+        lineHeight: lineHeight,
+        letterSpacing: letterSpacing,
+        italic: $italic,
+        weight: $weight
     };
     return index;
 }
@@ -122,14 +149,40 @@ proc NE_Component_Text_init {
 
 func NE_Component_Text_copy(index) {
     local newIndex = NE_Component_Text_new(
-        NE_Component_Text_list[$index].text
+        text: NE_Component_Text_list[$index].text,
+        size: NE_Component_Text_list[$index].size,
+        startTime: NE_Component_Text_list[$index].startTime,
+        totalTime: NE_Component_Text_list[$index].totalTime,
+        lineHeight: NE_Component_Text_list[$index].lineHeight,
+        letterSpacing: NE_Component_Text_list[$index].letterSpacing,
+        italic: NE_Component_Text_list[$index].italic,
+        weight: NE_Component_Text_list[$index].weight
     );
-    NE_Component_Text_list[newIndex] = NE_Component_Text_list[$index];
     return newIndex;
 }
 
 proc NE_Component_Text_render infoIndex, componentIndexIndex {
     # TODO: Implement text rendering
+    local x = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x + NE_COMPONENT_INFO_X($infoIndex);
+    local y = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y + NE_COMPONENT_INFO_Y($infoIndex);
+    local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha * NE_COMPONENT_INFO_ALPHA($infoIndex);
+    local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation + NE_COMPONENT_INFO_ROTATION($infoIndex);
+    GL_setShaderAlpha alpha;
+    GL_setShaderColor NE_COMPONENT_INFO_COLOR($infoIndex);
+
+    GL_drawMultiLineTextToStage
+        x,
+        y,
+        NE_COMPONENT_INFO_WIDTH($infoIndex),
+        NE_COMPONENT_INFO_HEIGHT($infoIndex),
+        rotation,
+        NE_Component_Text_list[$componentIndexIndex].text,
+        NE_Component_Text_list[$componentIndexIndex].size,
+        NE_Component_Text_list[$componentIndexIndex].lineHeight,
+        NE_Component_Text_list[$componentIndexIndex].letterSpacing,
+        NE_Component_Text_list[$componentIndexIndex].italic,
+        NE_Component_Text_list[$componentIndexIndex].weight,
+        NE_COMPONENT_INFO_VALUE($infoIndex);
 }
 
 

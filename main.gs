@@ -1,4 +1,4 @@
-costumes "assets/FG/*.png";
+costumes "assets/FG/*.png", "assets/other/*.png";
 
 
 %define NE_STAGE_WIDTH 480
@@ -11,7 +11,10 @@ costumes "assets/FG/*.png";
 
 %include libs/Utils.gs
 
+%include libs/Action.gs
+
 %include libs/NAG.gs
+
 
 hide;
 
@@ -30,6 +33,8 @@ onflag {
     NE_NAG_init;
 
     NE_RenderUtils_init;
+
+    NE_Action_init;
 
     NE_UTILS_initTime;
     
@@ -87,12 +92,34 @@ onflag {
         layerIndex: layer,
         time: 1000;
 
+    messageLayer = NE_Layer_new();
+
+    NE_NAG_Text
+        id: "message",
+        layer: messageLayer,
+        page: "fore",
+        text: "Hello, World! こんにちは、世界！你好，世界！",
+        x: 40,
+        y: 40,
+        width: 400;
+
+    NE_NAG_Wait
+        time: 2000;
+
+    NE_NAG_Text
+        id: "message",
+        layer: messageLayer,
+        page: "fore",
+        text: "如果您愿意的话，让我带您去吧，这座小镇，愿望实现的地方……";
+
     forever {
         NE_Utils_updateDeltaTime;
         NE_NAG_update;
         NE_Layer_PageTransform_updateAll;
-        
+        NE_Action_updateAll;
+
         GL_clearStage;
         NE_Layer_renderLayer layer;
+        NE_Layer_renderLayer messageLayer;
     }
 }

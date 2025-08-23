@@ -16,8 +16,18 @@ list NE_ComponentInfo_list_free = [];
 %define NE_COMPONENT_INFO_COLOR(index) NE_ComponentInfo_list[index + 7]
 %define NE_COMPONENT_INFO_ALPHA(index) NE_ComponentInfo_list[index + 8]
 %define NE_COMPONENT_INFO_ROTATION(index) NE_ComponentInfo_list[index + 9]
+%define NE_COMPONENT_INFO_VALUE(index) NE_ComponentInfo_list[index + 10]
 
-%define NE_COMPONENT_INFO_SIZE 10
+%define NE_COMPONENT_INFO_SIZE 11
+
+%define NE_COMPONENT_INFO_X_INDEX 3
+%define NE_COMPONENT_INFO_Y_INDEX 4
+%define NE_COMPONENT_INFO_WIDTH_INDEX 5
+%define NE_COMPONENT_INFO_HEIGHT_INDEX 6
+%define NE_COMPONENT_INFO_COLOR_INDEX 7
+%define NE_COMPONENT_INFO_ALPHA_INDEX 8
+%define NE_COMPONENT_INFO_ROTATION_INDEX 9
+%define NE_COMPONENT_INFO_VALUE_INDEX 10
 
 %include libs/Component.gs
 
@@ -69,6 +79,7 @@ func NE_ComponentInfo_copy(index) {
     NE_COMPONENT_INFO_COLOR(newIndex) = NE_COMPONENT_INFO_COLOR($index);
     NE_COMPONENT_INFO_ALPHA(newIndex) = NE_COMPONENT_INFO_ALPHA($index);
     NE_COMPONENT_INFO_ROTATION(newIndex) = NE_COMPONENT_INFO_ROTATION($index);
+    NE_COMPONENT_INFO_VALUE(newIndex) = NE_COMPONENT_INFO_VALUE($index);
 
     return newIndex;
 }
