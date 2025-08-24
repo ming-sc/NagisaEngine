@@ -54,11 +54,20 @@ func NE_Component_Image_copy(index) {
 }
 
 proc NE_Component_Image_render infoIndex, componentIndexIndex {
-    local x = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x + NE_COMPONENT_INFO_X($infoIndex);
-    local y = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y + NE_COMPONENT_INFO_Y($infoIndex);
-    local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha * NE_COMPONENT_INFO_ALPHA($infoIndex);
-    local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation + NE_COMPONENT_INFO_ROTATION($infoIndex);
-    GL_setShaderAlpha alpha;
+    local parentIndex = NE_RENDER_INFO_STACK_TOP;
+    NE_RenderInfo_Stack_push;
+    NE_RenderInfo_setInfo
+        index: NE_RENDER_INFO_STACK_TOP,
+        parentIndex: parentIndex,
+        x: NE_COMPONENT_INFO_X($infoIndex),
+        y: NE_COMPONENT_INFO_Y($infoIndex),
+        alpha: NE_COMPONENT_INFO_ALPHA($infoIndex),
+        rotation: NE_COMPONENT_INFO_ROTATION($infoIndex);
+    # local x = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x + NE_COMPONENT_INFO_X($infoIndex);
+    # local y = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y + NE_COMPONENT_INFO_Y($infoIndex);
+    # local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha * NE_COMPONENT_INFO_ALPHA($infoIndex);
+    # local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation + NE_COMPONENT_INFO_ROTATION($infoIndex);
+    GL_setShaderAlpha NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha;
     GL_setShaderColor NE_COMPONENT_INFO_COLOR($infoIndex);
     
     GL_bindTexture 
@@ -67,12 +76,13 @@ proc NE_Component_Image_render infoIndex, componentIndexIndex {
         NE_Component_Image_list[$componentIndexIndex].originHeight;
 
     GL_draw2dTextureToStage
-        x,
-        y,
-        NE_COMPONENT_INFO_WIDTH($infoIndex),
-        NE_COMPONENT_INFO_HEIGHT($infoIndex),
-        rotation;
+        x: NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x,
+        y: NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y,
+        width: NE_COMPONENT_INFO_WIDTH($infoIndex),
+        height: NE_COMPONENT_INFO_HEIGHT($infoIndex),
+        rotation: NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation;
 
+    NE_RenderInfo_Stack_pop;
 }
 
 # Text
@@ -162,11 +172,23 @@ func NE_Component_Text_copy(index) {
 }
 
 proc NE_Component_Text_render infoIndex, componentIndexIndex {
-    # TODO: Implement text rendering
-    local x = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x + NE_COMPONENT_INFO_X($infoIndex);
-    local y = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y + NE_COMPONENT_INFO_Y($infoIndex);
-    local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha * NE_COMPONENT_INFO_ALPHA($infoIndex);
-    local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation + NE_COMPONENT_INFO_ROTATION($infoIndex);
+    local parentIndex = NE_RENDER_INFO_STACK_TOP;
+    NE_RenderInfo_Stack_push;
+    NE_RenderInfo_setInfo
+        index: NE_RENDER_INFO_STACK_TOP,
+        parentIndex: parentIndex,
+        x: NE_COMPONENT_INFO_X($infoIndex),
+        y: NE_COMPONENT_INFO_Y($infoIndex),
+        alpha: NE_COMPONENT_INFO_ALPHA($infoIndex),
+        rotation: NE_COMPONENT_INFO_ROTATION($infoIndex);
+    # local x = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x + NE_COMPONENT_INFO_X($infoIndex);
+    # local y = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y + NE_COMPONENT_INFO_Y($infoIndex);
+    # local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha * NE_COMPONENT_INFO_ALPHA($infoIndex);
+    # local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation + NE_COMPONENT_INFO_ROTATION($infoIndex);
+    local x = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x;
+    local y = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y;
+    local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha;
+    local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation;
     GL_setShaderAlpha alpha;
 
     # 绘制阴影
@@ -200,6 +222,8 @@ proc NE_Component_Text_render infoIndex, componentIndexIndex {
         NE_Component_Text_list[$componentIndexIndex].italic,
         NE_Component_Text_list[$componentIndexIndex].weight,
         NE_COMPONENT_INFO_VALUE($infoIndex);
+
+    NE_RenderInfo_Stack_pop;
 }
 
 

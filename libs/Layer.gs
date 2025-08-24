@@ -264,10 +264,18 @@ func NE_Layer_findComponentInfo(layerIndex, page, componentId) {
 proc NE_Layer_renderLayer layerIndex {
     # 背景
     if (NE_Layer_list[$layerIndex].backOpacity > 0) {
+        local parentIndex = NE_RENDER_INFO_STACK_TOP;
         NE_RenderInfo_Stack_push;
-        NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x = NE_Layer_list[$layerIndex].x;
-        NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y = NE_Layer_list[$layerIndex].y;
-        NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha = NE_Layer_list[$layerIndex].backOpacity;
+        NE_RenderInfo_setInfo 
+            index: NE_RENDER_INFO_STACK_TOP,
+            parentIndex: parentIndex,
+            x: NE_Layer_list[$layerIndex].x,
+            y: NE_Layer_list[$layerIndex].y,
+            alpha: NE_Layer_list[$layerIndex].backOpacity;
+
+        # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x = NE_Layer_list[$layerIndex].x;
+        # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y = NE_Layer_list[$layerIndex].y;
+        # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha = NE_Layer_list[$layerIndex].backOpacity;
         local p = NE_LinkList_list[NE_Layer_list[$layerIndex].backChildList].head;
         until (p == NE_LINKLIST_NULL) {
             NE_ComponentInfo_render NE_LinkListNode_list[p].data;
@@ -277,10 +285,18 @@ proc NE_Layer_renderLayer layerIndex {
     }
 
     # 前景
+    local parentIndex = NE_RENDER_INFO_STACK_TOP;
     NE_RenderInfo_Stack_push;
-    NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x = NE_Layer_list[$layerIndex].x;
-    NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y = NE_Layer_list[$layerIndex].y;
-    NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha = NE_Layer_list[$layerIndex].foreOpacity;
+    NE_RenderInfo_setInfo 
+        index: NE_RENDER_INFO_STACK_TOP,
+        parentIndex: parentIndex,
+        x: NE_Layer_list[$layerIndex].x,
+        y: NE_Layer_list[$layerIndex].y,
+        alpha: NE_Layer_list[$layerIndex].foreOpacity;
+
+    # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x = NE_Layer_list[$layerIndex].x;
+    # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y = NE_Layer_list[$layerIndex].y;
+    # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha = NE_Layer_list[$layerIndex].foreOpacity;
     local p = NE_LinkList_list[NE_Layer_list[$layerIndex].foreChildList].head;
     until (p == NE_LINKLIST_NULL) {
         NE_ComponentInfo_render NE_LinkListNode_list[p].data;
@@ -355,7 +371,7 @@ proc NE_Layer_PageTransform_updateAll {
             local t = (currentTime - transform.startTime) / transform.time;
             if (t >= 0) {
                 if (t >= 1) {
-                    NE_Layer_list[index].backOpacity = 0;
+                    NE_Layer_list[transform.layerIndex].backOpacity = 0;
                     NE_Layer_PageTransform_list[index].completed = 1;
                 }
 
