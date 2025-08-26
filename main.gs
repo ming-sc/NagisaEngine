@@ -129,7 +129,8 @@ onflag {
         y: 290,
         width: 400,
         fontSize: 25,
-        color: "#FFFFFF";
+        color: "#FFFFFF",
+        alpha: 1.0;
 
     NE_NAG_Wait
         time: 2000;
@@ -139,6 +140,17 @@ onflag {
         layer: messageLayer,
         page: "fore",
         text: "「如果您愿意的话，让我带您去吧，这座小镇，愿望实现的地方……」";
+
+    NE_NAG_Wait
+        time: 2000;
+
+    NE_NAG_Action
+        layer: layer,
+        easing: "const",
+        duration: 1000,
+        start: 1,
+        target: 0,
+        relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
 
     forever {
         NE_Utils_updateDeltaTime;

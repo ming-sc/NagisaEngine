@@ -22,11 +22,11 @@ proc NE_Action_init {
 
 func NE_Action_new (
     easing = "const",
-    startTime = 0,
-    duration = 0,
-    componentInfoIndex = 0,
-    start = 0,
-    diff = 0
+    startTime,
+    duration,
+    componentInfoIndex,
+    start,
+    diff
 ) {
     local index = 0;
     if (length(NE_Action_list_free) > 0) {

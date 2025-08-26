@@ -372,8 +372,8 @@ func NE_NAG_Text_modOrNew(nagIndex) {
 %define NE_NAG_ACTION_SIZE 10
 
 proc NE_NAG_Action
-    id,
-    layer, page,
+    id = "",
+    layer, page = "",
     easing,
     offset = 0,
     duration,
@@ -412,19 +412,86 @@ func NE_NAG_Action_new(nagIndex){
     local id = NE_NAG_ACTION_COMPONENT_ID($nagIndex);
     local layer = NE_NAG_ACTION_LAYER($nagIndex);
     local page = NE_NAG_ACTION_PAGE($nagIndex);
-    
-    # 用 id 查找组件
-    local nodeIndex = NE_Layer_findComponentInfo(layer, page, id);
-    if (nodeIndex != NE_LINKLIST_NULL) {
-        local infoIndex = NE_LinkListNode_list[nodeIndex].data;
+
+    if (id != "" and page != "") {
+        # 用 id 查找组件
+        local nodeIndex = NE_Layer_findComponentInfo(layer, page, id);
+        if (nodeIndex != NE_LINKLIST_NULL) {
+            local infoIndex = NE_LinkListNode_list[nodeIndex].data;
+            local action = NE_Action_new(
+                easing: NE_NAG_ACTION_EASING($nagIndex),
+                startTime: NE_UTILS_CURRENT_TIME + NE_NAG_ACTION_OFFSET($nagIndex),
+                start: NE_NAG_ACTION_START($nagIndex),
+                duration: NE_NAG_ACTION_DURATION($nagIndex),
+                componentInfoIndex: infoIndex + NE_NAG_ACTION_RELATIVE_INDEX($nagIndex),
+                diff: NE_NAG_ACTION_DIFF($nagIndex)
+            );
+        }
+    } elif (id == "" and page == "" and layer != "") {
+        # 如果id 和 page 都为空, 则控制整个 Layer
+        local infoIndex = NE_Layer_list[layer].componentInfoId;
         local action = NE_Action_new(
-            NE_NAG_ACTION_EASING($nagIndex),
-            NE_UTILS_CURRENT_TIME + NE_NAG_ACTION_OFFSET($nagIndex),
-            NE_NAG_ACTION_DURATION($nagIndex),
-            infoIndex + NE_NAG_ACTION_RELATIVE_INDEX($nagIndex),
-            NE_NAG_ACTION_START($nagIndex),
-            NE_NAG_ACTION_DIFF($nagIndex)
+            easing: NE_NAG_ACTION_EASING($nagIndex),
+            startTime: NE_UTILS_CURRENT_TIME + NE_NAG_ACTION_OFFSET($nagIndex),
+            start: NE_NAG_ACTION_START($nagIndex),
+            duration: NE_NAG_ACTION_DURATION($nagIndex),
+            componentInfoIndex: infoIndex + NE_NAG_ACTION_RELATIVE_INDEX($nagIndex),
+            diff: NE_NAG_ACTION_DIFF($nagIndex)
         );
+    }
+    
+
+    return 0;
+}
+
+# Layer
+# 取 Common 中的 type
+%define NE_NAG_LAYER_INDEX(index) NE_NAG_list[index + 1]
+%define NE_NAG_LAYER_X(index) NE_NAG_list[index + 2]
+%define NE_NAG_LAYER_Y(index) NE_NAG_list[index + 3]
+%define NE_NAG_LAYER_ALPHA(index) NE_NAG_list[index + 4]
+%define NE_NAG_LAYER_ROTATION(index) NE_NAG_list[index + 5]
+
+%define NE_NAG_LAYER_SIZE 6
+
+proc NE_NAG_Layer
+    layerIndex,
+    x = "", y = "",
+    alpha = "",
+    rotation = ""
+{
+    local index = length(NE_NAG_list) + 1;
+    repeat (NE_NAG_LAYER_SIZE) {
+        add 0 to NE_NAG_list;
+    }
+    NE_NAG_COMMON_TYPE(index) = "layer";
+
+    NE_NAG_LAYER_INDEX(index) = $layerIndex;
+    NE_NAG_LAYER_X(index) = $x;
+    NE_NAG_LAYER_Y(index) = $y;
+    NE_NAG_LAYER_ALPHA(index) = $alpha;
+    NE_NAG_LAYER_ROTATION(index) = $rotation;
+}
+
+func NE_NAG_Layer_mod(nagIndex) {
+    local layerIndex = NE_NAG_LAYER_INDEX($nagIndex);
+    local x = NE_NAG_LAYER_X($nagIndex);
+    local y = NE_NAG_LAYER_Y($nagIndex);
+    local alpha = NE_NAG_LAYER_ALPHA($nagIndex);
+    local rotation = NE_NAG_LAYER_ROTATION($nagIndex);
+    local infoIndex = NE_Layer_list[layerIndex].componentInfoId;
+
+    if (x != "") {
+        NE_COMPONENT_INFO_X(infoIndex) = x;
+    }
+    if (y != "") {
+        NE_COMPONENT_INFO_Y(infoIndex) = y;
+    }
+    if (alpha != "") {
+        NE_COMPONENT_INFO_ALPHA(infoIndex) = alpha;
+    }
+    if (rotation != "") {
+        NE_COMPONENT_INFO_ROTATION(infoIndex) = rotation;
     }
 
     return 0;
@@ -450,6 +517,9 @@ proc NE_NAG_update {
         } elif (type == "image") {
             block = NE_NAG_Image_modOrNew(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_IMAGE_SIZE;
+        } elif (type == "layer") {
+            block = NE_NAG_Layer_mod(NE_NAG_pointer);
+            NE_NAG_pointer += NE_NAG_LAYER_SIZE;
         } elif (type == "trans") {
             block = NE_NAG_PageTransform_new(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_TRANSFORM_SIZE;

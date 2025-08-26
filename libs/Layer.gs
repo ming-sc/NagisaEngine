@@ -143,7 +143,8 @@ struct NE_Layer {
     foreOpacity = 1.0,
     foreChildList = 0,
     backOpacity = 0.0,
-    backChildList = 0
+    backChildList = 0,
+    componentInfoId = 0
 }
 
 list NE_Layer NE_Layer_list = [];
@@ -164,14 +165,16 @@ func NE_Layer_new () {
             x: 0, y: 0,
             width: 0, height: 0,
             foreChildList: NE_LinkList_new(),
-            backChildList: NE_LinkList_new()
+            backChildList: NE_LinkList_new(),
+            componentInfoId: NE_ComponentInfo_new(0, "layer", 0)
         };
     } else {
         add NE_Layer {
             x: 0, y: 0,
             width: 0, height: 0,
             foreChildList: NE_LinkList_new(),
-            backChildList: NE_LinkList_new()
+            backChildList: NE_LinkList_new(),
+            componentInfoId: NE_ComponentInfo_new(0, "layer", 0)
         } to NE_Layer_list;
         index = length(NE_Layer_list);
     }
@@ -183,6 +186,8 @@ proc NE_Layer_free index {
     NE_Layer_clearChildList NE_Layer_list[$index].backChildList;
     NE_LinkList_list_free NE_Layer_list[$index].foreChildList;
     NE_LinkList_list_free NE_Layer_list[$index].backChildList;
+
+    NE_ComponentInfo_free NE_Layer_list[$index].componentInfoId;
 
     add $index to NE_Layer_list_free;
 }
@@ -262,47 +267,58 @@ func NE_Layer_findComponentInfo(layerIndex, page, componentId) {
 }
 
 proc NE_Layer_renderLayer layerIndex {
-    # 背景
-    if (NE_Layer_list[$layerIndex].backOpacity > 0) {
+    local componentInfoId = NE_Layer_list[$layerIndex].componentInfoId;
+    local alpha = NE_COMPONENT_INFO_ALPHA(componentInfoId);
+    if (alpha > 0) {
+        local x = NE_COMPONENT_INFO_X(componentInfoId);
+        local y = NE_COMPONENT_INFO_Y(componentInfoId);
+        local rotation = NE_COMPONENT_INFO_ROTATION(componentInfoId);
+        
+        # 背景
+        if (NE_Layer_list[$layerIndex].backOpacity > 0) {
+            local parentIndex = NE_RENDER_INFO_STACK_TOP;
+            
+            NE_RenderInfo_Stack_push;
+            NE_RenderInfo_setInfo 
+                index: NE_RENDER_INFO_STACK_TOP,
+                parentIndex: parentIndex,
+                x: x,
+                y: y,
+                alpha: alpha * NE_Layer_list[$layerIndex].backOpacity,
+                rotation: rotation;
+
+            # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x = NE_Layer_list[$layerIndex].x;
+            # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y = NE_Layer_list[$layerIndex].y;
+            # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha = NE_Layer_list[$layerIndex].backOpacity;
+            local p = NE_LinkList_list[NE_Layer_list[$layerIndex].backChildList].head;
+            until (p == NE_LINKLIST_NULL) {
+                NE_ComponentInfo_render NE_LinkListNode_list[p].data;
+                p = NE_LinkListNode_list[p].next;
+            }
+            NE_RenderInfo_Stack_pop;
+        }
+
+        # 前景
         local parentIndex = NE_RENDER_INFO_STACK_TOP;
         NE_RenderInfo_Stack_push;
         NE_RenderInfo_setInfo 
             index: NE_RENDER_INFO_STACK_TOP,
             parentIndex: parentIndex,
-            x: NE_Layer_list[$layerIndex].x,
-            y: NE_Layer_list[$layerIndex].y,
-            alpha: NE_Layer_list[$layerIndex].backOpacity;
+            x: x,
+            y: y,
+            alpha: alpha * NE_Layer_list[$layerIndex].foreOpacity,
+            rotation: rotation;
 
         # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x = NE_Layer_list[$layerIndex].x;
         # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y = NE_Layer_list[$layerIndex].y;
-        # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha = NE_Layer_list[$layerIndex].backOpacity;
-        local p = NE_LinkList_list[NE_Layer_list[$layerIndex].backChildList].head;
+        # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha = NE_Layer_list[$layerIndex].foreOpacity;
+        local p = NE_LinkList_list[NE_Layer_list[$layerIndex].foreChildList].head;
         until (p == NE_LINKLIST_NULL) {
             NE_ComponentInfo_render NE_LinkListNode_list[p].data;
             p = NE_LinkListNode_list[p].next;
         }
         NE_RenderInfo_Stack_pop;
     }
-
-    # 前景
-    local parentIndex = NE_RENDER_INFO_STACK_TOP;
-    NE_RenderInfo_Stack_push;
-    NE_RenderInfo_setInfo 
-        index: NE_RENDER_INFO_STACK_TOP,
-        parentIndex: parentIndex,
-        x: NE_Layer_list[$layerIndex].x,
-        y: NE_Layer_list[$layerIndex].y,
-        alpha: NE_Layer_list[$layerIndex].foreOpacity;
-
-    # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x = NE_Layer_list[$layerIndex].x;
-    # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y = NE_Layer_list[$layerIndex].y;
-    # NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha = NE_Layer_list[$layerIndex].foreOpacity;
-    local p = NE_LinkList_list[NE_Layer_list[$layerIndex].foreChildList].head;
-    until (p == NE_LINKLIST_NULL) {
-        NE_ComponentInfo_render NE_LinkListNode_list[p].data;
-        p = NE_LinkListNode_list[p].next;
-    }
-    NE_RenderInfo_Stack_pop;
 }
 
 # Transform

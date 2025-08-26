@@ -54,35 +54,36 @@ func NE_Component_Image_copy(index) {
 }
 
 proc NE_Component_Image_render infoIndex, componentIndexIndex {
-    local parentIndex = NE_RENDER_INFO_STACK_TOP;
-    NE_RenderInfo_Stack_push;
-    NE_RenderInfo_setInfo
-        index: NE_RENDER_INFO_STACK_TOP,
-        parentIndex: parentIndex,
-        x: NE_COMPONENT_INFO_X($infoIndex),
-        y: NE_COMPONENT_INFO_Y($infoIndex),
-        alpha: NE_COMPONENT_INFO_ALPHA($infoIndex),
-        rotation: NE_COMPONENT_INFO_ROTATION($infoIndex);
-    # local x = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x + NE_COMPONENT_INFO_X($infoIndex);
-    # local y = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y + NE_COMPONENT_INFO_Y($infoIndex);
-    # local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha * NE_COMPONENT_INFO_ALPHA($infoIndex);
-    # local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation + NE_COMPONENT_INFO_ROTATION($infoIndex);
-    GL_setShaderAlpha NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha;
-    GL_setShaderColor NE_COMPONENT_INFO_COLOR($infoIndex);
+    local alpha = NE_COMPONENT_INFO_ALPHA($infoIndex);
+    if (alpha > 0) {
+        local parentIndex = NE_RENDER_INFO_STACK_TOP;
+        NE_RenderInfo_Stack_push;
+        NE_RenderInfo_setInfo
+            index: NE_RENDER_INFO_STACK_TOP,
+            parentIndex: parentIndex,
+            x: NE_COMPONENT_INFO_X($infoIndex),
+            y: NE_COMPONENT_INFO_Y($infoIndex),
+            alpha: alpha,
+            rotation: NE_COMPONENT_INFO_ROTATION($infoIndex);
+
+        GL_setShaderAlpha NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha;
+        GL_setShaderColor NE_COMPONENT_INFO_COLOR($infoIndex);
+        
+        GL_bindTexture 
+            NE_Component_Image_list[$componentIndexIndex].storage,
+            NE_Component_Image_list[$componentIndexIndex].originWidth,
+            NE_Component_Image_list[$componentIndexIndex].originHeight;
+
+        GL_draw2dTextureToStage
+            x: NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x,
+            y: NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y,
+            width: NE_COMPONENT_INFO_WIDTH($infoIndex),
+            height: NE_COMPONENT_INFO_HEIGHT($infoIndex),
+            rotation: NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation;
+
+        NE_RenderInfo_Stack_pop;
+    }
     
-    GL_bindTexture 
-        NE_Component_Image_list[$componentIndexIndex].storage,
-        NE_Component_Image_list[$componentIndexIndex].originWidth,
-        NE_Component_Image_list[$componentIndexIndex].originHeight;
-
-    GL_draw2dTextureToStage
-        x: NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x,
-        y: NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y,
-        width: NE_COMPONENT_INFO_WIDTH($infoIndex),
-        height: NE_COMPONENT_INFO_HEIGHT($infoIndex),
-        rotation: NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation;
-
-    NE_RenderInfo_Stack_pop;
 }
 
 # Text
@@ -172,58 +173,57 @@ func NE_Component_Text_copy(index) {
 }
 
 proc NE_Component_Text_render infoIndex, componentIndexIndex {
-    local parentIndex = NE_RENDER_INFO_STACK_TOP;
-    NE_RenderInfo_Stack_push;
-    NE_RenderInfo_setInfo
-        index: NE_RENDER_INFO_STACK_TOP,
-        parentIndex: parentIndex,
-        x: NE_COMPONENT_INFO_X($infoIndex),
-        y: NE_COMPONENT_INFO_Y($infoIndex),
-        alpha: NE_COMPONENT_INFO_ALPHA($infoIndex),
-        rotation: NE_COMPONENT_INFO_ROTATION($infoIndex);
-    # local x = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x + NE_COMPONENT_INFO_X($infoIndex);
-    # local y = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y + NE_COMPONENT_INFO_Y($infoIndex);
-    # local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha * NE_COMPONENT_INFO_ALPHA($infoIndex);
-    # local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation + NE_COMPONENT_INFO_ROTATION($infoIndex);
-    local x = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x;
-    local y = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y;
-    local alpha = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha;
-    local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation;
-    GL_setShaderAlpha alpha;
+    local alpha = NE_COMPONENT_INFO_ALPHA($infoIndex);
+    if (alpha > 0) {
+        local parentIndex = NE_RENDER_INFO_STACK_TOP;
+        NE_RenderInfo_Stack_push;
+        NE_RenderInfo_setInfo
+            index: NE_RENDER_INFO_STACK_TOP,
+            parentIndex: parentIndex,
+            x: NE_COMPONENT_INFO_X($infoIndex),
+            y: NE_COMPONENT_INFO_Y($infoIndex),
+            alpha: alpha,
+            rotation: NE_COMPONENT_INFO_ROTATION($infoIndex);
 
-    # 绘制阴影
-    GL_setShaderColor 0;
-    GL_drawMultiLineTextToStage
-        x + 1,
-        y + 1,
-        NE_COMPONENT_INFO_WIDTH($infoIndex),
-        NE_COMPONENT_INFO_HEIGHT($infoIndex),
-        rotation,
-        NE_Component_Text_list[$componentIndexIndex].text,
-        NE_Component_Text_list[$componentIndexIndex].size,
-        NE_Component_Text_list[$componentIndexIndex].lineHeight,
-        NE_Component_Text_list[$componentIndexIndex].letterSpacing,
-        NE_Component_Text_list[$componentIndexIndex].italic,
-        NE_Component_Text_list[$componentIndexIndex].weight,
-        NE_COMPONENT_INFO_VALUE($infoIndex);
+        local x = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].x;
+        local y = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].y;
+        local rotation = NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].rotation;
+        GL_setShaderAlpha NE_RenderInfo_list[NE_RENDER_INFO_STACK_TOP].alpha;
 
-    GL_setShaderColor NE_COMPONENT_INFO_COLOR($infoIndex);
+        # 绘制阴影
+        GL_setShaderColor 0;
+        GL_drawMultiLineTextToStage
+            x + 1,
+            y + 1,
+            NE_COMPONENT_INFO_WIDTH($infoIndex),
+            NE_COMPONENT_INFO_HEIGHT($infoIndex),
+            rotation,
+            NE_Component_Text_list[$componentIndexIndex].text,
+            NE_Component_Text_list[$componentIndexIndex].size,
+            NE_Component_Text_list[$componentIndexIndex].lineHeight,
+            NE_Component_Text_list[$componentIndexIndex].letterSpacing,
+            NE_Component_Text_list[$componentIndexIndex].italic,
+            NE_Component_Text_list[$componentIndexIndex].weight,
+            NE_COMPONENT_INFO_VALUE($infoIndex);
 
-    GL_drawMultiLineTextToStage
-        x,
-        y,
-        NE_COMPONENT_INFO_WIDTH($infoIndex),
-        NE_COMPONENT_INFO_HEIGHT($infoIndex),
-        rotation,
-        NE_Component_Text_list[$componentIndexIndex].text,
-        NE_Component_Text_list[$componentIndexIndex].size,
-        NE_Component_Text_list[$componentIndexIndex].lineHeight,
-        NE_Component_Text_list[$componentIndexIndex].letterSpacing,
-        NE_Component_Text_list[$componentIndexIndex].italic,
-        NE_Component_Text_list[$componentIndexIndex].weight,
-        NE_COMPONENT_INFO_VALUE($infoIndex);
+        GL_setShaderColor NE_COMPONENT_INFO_COLOR($infoIndex);
 
-    NE_RenderInfo_Stack_pop;
+        GL_drawMultiLineTextToStage
+            x,
+            y,
+            NE_COMPONENT_INFO_WIDTH($infoIndex),
+            NE_COMPONENT_INFO_HEIGHT($infoIndex),
+            rotation,
+            NE_Component_Text_list[$componentIndexIndex].text,
+            NE_Component_Text_list[$componentIndexIndex].size,
+            NE_Component_Text_list[$componentIndexIndex].lineHeight,
+            NE_Component_Text_list[$componentIndexIndex].letterSpacing,
+            NE_Component_Text_list[$componentIndexIndex].italic,
+            NE_Component_Text_list[$componentIndexIndex].weight,
+            NE_COMPONENT_INFO_VALUE($infoIndex);
+
+        NE_RenderInfo_Stack_pop;
+    }
 }
 
 
