@@ -15,7 +15,6 @@ costumes "assets/FG/*.png", "assets/other/*.png";
 
 %include libs/NAG.gs
 
-
 hide;
 
 onflag {
@@ -37,8 +36,20 @@ onflag {
     NE_Action_init;
 
     NE_UTILS_initTime;
+
+    NE_SoundChannel_init;
+    NE_SoundAction_init;
     
     layer = NE_Layer_new();
+
+    NE_NAG_Sound
+        id: "bgm",
+        mainStorage: "BGM02A1",
+        preStorage: "BGM02A0",
+        loop: true,
+        mainLength: 115.211,
+        preLength: 6.2,
+        volume: 1;
     
     NE_NAG_Image 
         id: "bg",
@@ -152,11 +163,19 @@ onflag {
         target: 0,
         relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
 
+    NE_NAG_SoundAction
+        id: "bgm",
+        duration: 1000,
+        fromVolume: 1,
+        toVolume: 0;
+
     forever {
         NE_Utils_updateDeltaTime;
         NE_NAG_update;
         NE_Layer_PageTransform_updateAll;
         NE_Action_updateAll;
+        NE_SoundChannel_updateAll;
+        NE_SoundAction_updateAll;
 
         GL_clearStage;
         NE_Layer_renderLayer layer;

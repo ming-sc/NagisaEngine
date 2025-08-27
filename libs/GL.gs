@@ -95,7 +95,6 @@ proc GL_drawMultiLineTextToStage
             currentY -= $lineHeight * currentSize;
         }
         Ven_Font_drawCharByIndex charIndex, currentX + currentWidth, currentY, currentSize, currentItalic;
-        # Ven_Font_drawChar char, currentX + currentWidth, currentY, currentSize, currentWeight, currentItalic;
         currentWidth += charWidth;
         i += 1;
     }

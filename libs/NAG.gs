@@ -5,6 +5,8 @@
 
 %include libs/ComponentInfo.gs
 
+%include libs/Sound.gs
+
 list NE_NAG_list = [];
 
 
@@ -497,6 +499,142 @@ func NE_NAG_Layer_mod(nagIndex) {
     return 0;
 }
 
+# Sound
+# 取 Common 中的 type
+%define NE_NAG_SOUND_ID(index) NE_NAG_list[index + 1]
+%define NE_NAG_SOUND_MAINSTORAGE(index) NE_NAG_list[index + 2]
+%define NE_NAG_SOUND_PRESTORAGE(index) NE_NAG_list[index + 3]
+%define NE_NAG_SOUND_VOLUME(index) NE_NAG_list[index + 4]
+%define NE_NAG_SOUND_LOOP(index) NE_NAG_list[index + 5]
+%define NE_NAG_SOUND_STATE(index) NE_NAG_list[index + 6]
+%define NE_NAG_SOUND_MAINLENGTH(index) NE_NAG_list[index + 7]
+%define NE_NAG_SOUND_PRELENGTH(index) NE_NAG_list[index + 8]
+
+%define NE_NAG_SOUND_SIZE 9
+
+proc NE_NAG_Sound
+    id,
+    mainStorage,
+    preStorage = "",
+    volume = "",
+    loop = false,
+    mainLength,
+    preLength = "",
+    state = NE_SOUND_CHANNEL_STATE_PLAYING
+{
+    local index = length(NE_NAG_list) + 1;
+    repeat (NE_NAG_SOUND_SIZE) {
+        add 0 to NE_NAG_list;
+    }
+    NE_NAG_COMMON_TYPE(index) = "sound";
+
+    NE_NAG_SOUND_ID(index) = $id;
+    NE_NAG_SOUND_MAINSTORAGE(index) = $mainStorage;
+    NE_NAG_SOUND_PRESTORAGE(index) = $preStorage;
+    NE_NAG_SOUND_VOLUME(index) = $volume;
+    NE_NAG_SOUND_LOOP(index) = $loop;
+    NE_NAG_SOUND_MAINLENGTH(index) = $mainLength;
+    NE_NAG_SOUND_PRELENGTH(index) = $preLength;
+    NE_NAG_SOUND_STATE(index) = $state;
+}
+
+func NE_NAG_Sound_modOrNew(nagIndex) {
+    local id = NE_NAG_SOUND_ID($nagIndex);
+
+    local channelIndex = NE_SoundChannel_findById(id);
+
+    if (channelIndex != NE_SOUND_CHANNEL_NULL) {
+        local volume = NE_NAG_SOUND_VOLUME($nagIndex);
+        local state = NE_NAG_SOUND_STATE($nagIndex);
+
+        if (volume != "") {
+            NE_SoundChannel_list[channelIndex].volume = volume;
+        }
+
+        if (state != "") {
+            NE_SoundChannel_list[channelIndex].state = state;
+        }
+    } else {
+        local empty = NE_SoundChannel_new(
+            id: NE_NAG_SOUND_ID($nagIndex),
+            mainStorage: NE_NAG_SOUND_MAINSTORAGE($nagIndex),
+            preStorage: NE_NAG_SOUND_PRESTORAGE($nagIndex),
+            volume: NE_NAG_SOUND_VOLUME($nagIndex),
+            loop: NE_NAG_SOUND_LOOP($nagIndex),
+            mainLength: NE_NAG_SOUND_MAINLENGTH($nagIndex),
+            preLength: NE_NAG_SOUND_PRELENGTH($nagIndex),
+            state: NE_NAG_SOUND_STATE($nagIndex)
+        );
+        add empty to NE_SoundChannel_needUpdate;
+        broadcast_and_wait "SoundChannel::clone";
+    }
+
+    return 0;
+}
+
+# SoundAction
+# 取 Common 中的 type
+%define NE_NAG_SOUND_ACTION_ID(index) NE_NAG_list[index + 1]
+%define NE_NAG_SOUND_ACTION_OFFSET(index) NE_NAG_list[index + 2]
+%define NE_NAG_SOUND_ACTION_DURATION(index) NE_NAG_list[index + 3]
+%define NE_NAG_SOUND_ACTION_FROM_VOLUME(index) NE_NAG_list[index + 4]
+%define NE_NAG_SOUND_ACTION_DIFF_VOLUME(index) NE_NAG_list[index + 5]
+%define NE_NAG_SOUND_ACTION_IS_STOP(index) NE_NAG_list[index + 6]
+
+%define NE_NAG_SOUND_ACTION_SIZE 7
+
+proc NE_NAG_SoundAction
+    id,
+    offset = 0,
+    duration,
+    fromVolume = 1,
+    toVolume = "",
+    diffVolume = "",
+    isStop = true
+{
+    local index = length(NE_NAG_list) + 1;
+    repeat (NE_NAG_SOUND_ACTION_SIZE) {
+        add 0 to NE_NAG_list;
+    }
+
+    local diffVolume = 0;
+    if ($diffVolume != "") {
+        diffVolume = $diffVolume;
+    }
+    # 如果有 target 则使用 target, target 优先级高于 diff
+    if ($toVolume != "") {
+        diffVolume = $toVolume - $fromVolume;
+    }
+
+    NE_NAG_COMMON_TYPE(index) = "sound_action";
+
+    NE_NAG_SOUND_ACTION_ID(index) = $id;
+    NE_NAG_SOUND_ACTION_OFFSET(index) = $offset;
+    NE_NAG_SOUND_ACTION_DURATION(index) = $duration;
+    NE_NAG_SOUND_ACTION_FROM_VOLUME(index) = $fromVolume;
+    NE_NAG_SOUND_ACTION_DIFF_VOLUME(index) = diffVolume;
+    NE_NAG_SOUND_ACTION_IS_STOP(index) = $isStop;
+}
+
+func NE_NAG_SoundAction_new(nagIndex) {
+    local id = NE_NAG_SOUND_ACTION_ID($nagIndex);
+
+    local channelIndex = NE_SoundChannel_findById(id);
+    if (channelIndex != NE_SOUND_CHANNEL_NULL) {
+        local soundAction = NE_SoundAction_new(
+            channelIndex: channelIndex,
+            startTime: NE_UTILS_CURRENT_TIME + NE_NAG_SOUND_ACTION_OFFSET($nagIndex),
+            duration: NE_NAG_SOUND_ACTION_DURATION($nagIndex),
+            fromVolume: NE_NAG_SOUND_ACTION_FROM_VOLUME($nagIndex),
+            diffVolume: NE_NAG_SOUND_ACTION_DIFF_VOLUME($nagIndex),
+            isStop: NE_NAG_SOUND_ACTION_IS_STOP($nagIndex)
+        );
+        add soundAction to NE_SoundAction_needUpdate;
+    }
+
+    return 0;
+}
+
 # NAG
 var NE_NAG_pointer = 0;
 
@@ -520,12 +658,18 @@ proc NE_NAG_update {
         } elif (type == "layer") {
             block = NE_NAG_Layer_mod(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_LAYER_SIZE;
+        } elif (type == "sound") {
+            block = NE_NAG_Sound_modOrNew(NE_NAG_pointer);
+            NE_NAG_pointer += NE_NAG_SOUND_SIZE;
         } elif (type == "trans") {
             block = NE_NAG_PageTransform_new(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_TRANSFORM_SIZE;
         } elif(type == "action") {
             block = NE_NAG_Action_new(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_ACTION_SIZE;
+        } elif (type == "sound_action") {
+            block = NE_NAG_SoundAction_new(NE_NAG_pointer);
+            NE_NAG_pointer += NE_NAG_SOUND_ACTION_SIZE;
         } elif (type == "wait") {
             block = NE_NAG_Wait_newOrCheck(NE_NAG_pointer);
             if (block == 0) {

@@ -1,9 +1,6 @@
 %if not NE_UTILS
 %define NE_UTILS
 
-var NE_UTILS_CURRENT_TIME = 0;
-var NE_UTILS_DELTA_TIME = 0;
-
 func NE_Utils_getNowTime () {
     return days_since_2000() * 86400000;
 }
