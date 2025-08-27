@@ -7,6 +7,8 @@
 
 %include libs/Sound.gs
 
+%include libs/KeyDetect.gs
+
 list NE_NAG_list = [];
 
 
@@ -237,7 +239,7 @@ proc NE_NAG_Text
     value = "",
     text = "",
     fontSize = "",
-    speed = 35,
+    speed = 70,
     time = "",
     lineHeight = "",
     letterSpacing = "",
@@ -566,7 +568,7 @@ func NE_NAG_Sound_modOrNew(nagIndex) {
             state: NE_NAG_SOUND_STATE($nagIndex)
         );
         add empty to NE_SoundChannel_needUpdate;
-        broadcast_and_wait "SoundChannel::clone";
+        broadcast "SoundChannel::clone";
     }
 
     return 0;
@@ -635,6 +637,39 @@ func NE_NAG_SoundAction_new(nagIndex) {
     return 0;
 }
 
+# WaitForKey
+# 取 Common 中的 type
+
+%define NE_NAG_WAIT_FOR_KEY_SIZE 1
+
+proc NE_NAG_WaitForKey {
+    local index = length(NE_NAG_list) + 1;
+    repeat (NE_NAG_WAIT_FOR_KEY_SIZE) {
+        add 0 to NE_NAG_list;
+    }
+
+    NE_NAG_COMMON_TYPE(index) = "wait_for_key";
+}
+
+func NE_NAG_WaitForKey_check(nagIndex) {
+    local block = true;
+    if (NE_KeyDetect_consumeKeyClick(NE_KEY_DETECT_MOUSECLICK)) {
+        block = false;
+    } elif (NE_KeyDetect_consumeKeyClick(NE_KEY_DETECT_ENTER)) {
+        block = false;
+    } elif (NE_KeyDetect_consumeKeyClick(NE_KEY_DETECT_SPACE)) {
+        block = false;
+    }
+    if (block == false) {
+        if (length(NE_Layer_PageTransform_needUpdate) > 0 or length(NE_Action_needUpdate) > 0) {
+            NE_Layer_PageTransform_completeAll;
+            NE_Action_completeAll;
+            return true;
+        }
+    }
+    return block;
+}
+
 # NAG
 var NE_NAG_pointer = 0;
 
@@ -667,6 +702,11 @@ proc NE_NAG_update {
         } elif(type == "action") {
             block = NE_NAG_Action_new(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_ACTION_SIZE;
+        } elif (type == "wait_for_key") {
+            block = NE_NAG_WaitForKey_check(NE_NAG_pointer);
+            if (block == 0) {
+                NE_NAG_pointer += NE_NAG_WAIT_FOR_KEY_SIZE;
+            }
         } elif (type == "sound_action") {
             block = NE_NAG_SoundAction_new(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_SOUND_ACTION_SIZE;

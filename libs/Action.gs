@@ -84,15 +84,14 @@ proc NE_Action_updateAll {
 }
 
 proc NE_Action_completeAll {
-    local p = 1;
-    until p > length(NE_Action_needUpdate) {
-        local actionIndex = NE_Action_needUpdate[p];
+    repeat length(NE_Action_needUpdate) {
+        local actionIndex = NE_Action_needUpdate[1];
         NE_ComponentInfo_list[NE_Action_list[actionIndex].componentInfoIndex] = 
             NE_Action_list[actionIndex].start 
             + NE_Action_list[actionIndex].diff;
         
         NE_Action_free actionIndex;
-        delete NE_Action_needUpdate[p];
+        delete NE_Action_needUpdate[1];
     }
 }
 

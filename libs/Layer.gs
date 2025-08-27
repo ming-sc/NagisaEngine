@@ -422,4 +422,16 @@ func NE_Layer_PageTransform_linear (start, diff, t) {
     }
 }
 
+proc NE_Layer_PageTransform_completeAll {
+    repeat (length(NE_Layer_PageTransform_needUpdate)) {
+        local index = NE_Layer_PageTransform_needUpdate[1];
+        local layerIndex = NE_Layer_PageTransform_list[index].layerIndex;
+        NE_Layer_list[layerIndex].backOpacity = 0;
+        NE_Layer_list[layerIndex].foreOpacity = 1;
+        NE_Layer_PageTransform_list[index].completed = 1;
+        NE_Layer_PageTransform_free index;
+        delete NE_Layer_PageTransform_needUpdate[1];
+    }
+}
+
 %endif

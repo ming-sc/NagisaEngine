@@ -39,6 +39,8 @@ onflag {
 
     NE_SoundChannel_init;
     NE_SoundAction_init;
+
+    NE_KeyDetect_init;
     
     layer = NE_Layer_new();
 
@@ -48,7 +50,7 @@ onflag {
         preStorage: "BGM02A0",
         loop: true,
         mainLength: 115.211,
-        preLength: 6.2,
+        preLength: 6.19,
         volume: 1;
     
     NE_NAG_Image 
@@ -77,8 +79,7 @@ onflag {
         layerIndex: layer,
         time: 1000;
 
-    NE_NAG_Wait
-        time: 2000;
+    NE_NAG_WaitForKey;
 
     NE_NAG_Image
         id: "bg",
@@ -90,8 +91,7 @@ onflag {
         layerIndex: layer,
         time: 1000;
 
-    NE_NAG_Wait
-        time: 2000;
+    NE_NAG_WaitForKey;
 
     NE_NAG_Image
         id: "bg",
@@ -128,9 +128,6 @@ onflag {
         start: 0,
         target: 0.4;
 
-    NE_NAG_Wait
-        time: 1000;
-
     NE_NAG_Text
         id: "message",
         layer: messageLayer,
@@ -143,8 +140,7 @@ onflag {
         color: "#FFFFFF",
         alpha: 1.0;
 
-    NE_NAG_Wait
-        time: 2000;
+    NE_NAG_WaitForKey;
 
     NE_NAG_Text
         id: "message",
@@ -152,8 +148,7 @@ onflag {
         page: "fore",
         text: "「如果您愿意的话，让我带您去吧，这座小镇，愿望实现的地方……」";
 
-    NE_NAG_Wait
-        time: 2000;
+    NE_NAG_WaitForKey;
 
     NE_NAG_Action
         layer: layer,
@@ -171,6 +166,7 @@ onflag {
 
     forever {
         NE_Utils_updateDeltaTime;
+        NE_KeyDetect_updateAll;
         NE_NAG_update;
         NE_Layer_PageTransform_updateAll;
         NE_Action_updateAll;

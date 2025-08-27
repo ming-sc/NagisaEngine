@@ -4,6 +4,8 @@ sounds "assets/bgm/*.mp3";
 
 %include libs/SoundClone.gs
 
+hide;
+
 on "SoundChannel::clone" {
     NE_SoundChannel_channelIndex = NE_SoundChannel_needUpdate["last"];
     clone;
