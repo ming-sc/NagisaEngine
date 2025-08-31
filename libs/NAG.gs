@@ -297,6 +297,7 @@ func NE_NAG_Text_modOrNew(nagIndex) {
     local letterSpacing = NE_NAG_TEXT_LETTERSPACING($nagIndex);
     local italic = NE_NAG_TEXT_ITALIC($nagIndex);
     local weight = NE_NAG_TEXT_WEIGHT($nagIndex);
+    local value = NE_NAG_COMMON_VALUE($nagIndex);
     local textIndex = 0;
     if (nodeIndex == NE_LINKLIST_NULL) {
         textIndex = NE_Component_Text_new(
@@ -314,21 +315,7 @@ func NE_NAG_Text_modOrNew(nagIndex) {
         NE_Layer_addChild layer, page, infoIndex;
 
         # 文字显示动画 action
-        local action = NE_Action_new(
-            easing: "const",
-            startTime: NE_UTILS_CURRENT_TIME,
-            duration: totalTime,
-            componentInfoIndex: infoIndex + NE_COMPONENT_INFO_VALUE_INDEX,
-            start: 0,
-            diff: 1
-        );
-    } else {
-        local infoIndex = NE_LinkListNode_list[nodeIndex].data;
-        textIndex = NE_COMPONENT_INFO_INDEX(infoIndex);
-        # 有就修改
-        if (text != "") {
-            NE_Component_Text_list[textIndex].text = text;
-            # 修改文字触发动画 action
+        if (value != 1) {
             local action = NE_Action_new(
                 easing: "const",
                 startTime: NE_UTILS_CURRENT_TIME,
@@ -337,6 +324,24 @@ func NE_NAG_Text_modOrNew(nagIndex) {
                 start: 0,
                 diff: 1
             );
+        }
+    } else {
+        local infoIndex = NE_LinkListNode_list[nodeIndex].data;
+        textIndex = NE_COMPONENT_INFO_INDEX(infoIndex);
+        # 有就修改
+        if (text != "") {
+            NE_Component_Text_list[textIndex].text = text;
+            # 修改文字触发动画 action
+            if (value != 1) {
+                local action = NE_Action_new(
+                    easing: "const",
+                    startTime: NE_UTILS_CURRENT_TIME,
+                    duration: totalTime,
+                    componentInfoIndex: infoIndex + NE_COMPONENT_INFO_VALUE_INDEX,
+                    start: 0,
+                    diff: 1
+                );
+            }
         }
         if (fontSize != "") {
             NE_Component_Text_list[textIndex].size = fontSize;
@@ -501,6 +506,34 @@ func NE_NAG_Layer_mod(nagIndex) {
     return 0;
 }
 
+# LayerClear
+# 取 Common 中的 type
+%define NE_NAG_LAYERCLEAR_INDEX(index) NE_NAG_list[index + 1]
+%define NE_NAG_LAYERCLEAR_PAGE(index) NE_NAG_list[index + 2]
+
+%define NE_NAG_LAYERCLEAR_SIZE 3
+
+proc NE_NAG_LayerClear
+    layerIndex,
+    page
+{
+    local index = length(NE_NAG_list) + 1;
+    repeat (NE_NAG_LAYERCLEAR_SIZE) {
+        add 0 to NE_NAG_list;
+    }
+    NE_NAG_COMMON_TYPE(index) = "layer_clear";
+
+    NE_NAG_LAYERCLEAR_INDEX(index) = $layerIndex;
+    NE_NAG_LAYERCLEAR_PAGE(index) = $page;
+}
+
+func NE_NAG_LayerClear_clear(nagIndex) {
+    NE_Layer_clearChildListByPage
+        layerIndex: NE_NAG_LAYERCLEAR_INDEX($nagIndex),
+        page: NE_NAG_LAYERCLEAR_PAGE($nagIndex);
+    return 0;
+}
+
 # Sound
 # 取 Common 中的 type
 %define NE_NAG_SOUND_ID(index) NE_NAG_list[index + 1]
@@ -516,11 +549,11 @@ func NE_NAG_Layer_mod(nagIndex) {
 
 proc NE_NAG_Sound
     id,
-    mainStorage,
+    mainStorage = "",
     preStorage = "",
     volume = "",
     loop = false,
-    mainLength,
+    mainLength = "",
     preLength = "",
     state = NE_SOUND_CHANNEL_STATE_PLAYING
 {
@@ -557,18 +590,22 @@ func NE_NAG_Sound_modOrNew(nagIndex) {
             NE_SoundChannel_list[channelIndex].state = state;
         }
     } else {
-        local empty = NE_SoundChannel_new(
-            id: NE_NAG_SOUND_ID($nagIndex),
-            mainStorage: NE_NAG_SOUND_MAINSTORAGE($nagIndex),
-            preStorage: NE_NAG_SOUND_PRESTORAGE($nagIndex),
-            volume: NE_NAG_SOUND_VOLUME($nagIndex),
-            loop: NE_NAG_SOUND_LOOP($nagIndex),
-            mainLength: NE_NAG_SOUND_MAINLENGTH($nagIndex),
-            preLength: NE_NAG_SOUND_PRELENGTH($nagIndex),
-            state: NE_NAG_SOUND_STATE($nagIndex)
-        );
-        add empty to NE_SoundChannel_needUpdate;
-        broadcast "SoundChannel::clone";
+        local mainStorage = NE_NAG_SOUND_MAINSTORAGE($nagIndex);
+        local mainLength = NE_NAG_SOUND_MAINLENGTH($nagIndex);
+        if (mainStorage != "" and mainLength != "") {
+            local empty = NE_SoundChannel_new(
+                id: NE_NAG_SOUND_ID($nagIndex),
+                mainStorage: NE_NAG_SOUND_MAINSTORAGE($nagIndex),
+                preStorage: NE_NAG_SOUND_PRESTORAGE($nagIndex),
+                volume: NE_NAG_SOUND_VOLUME($nagIndex),
+                loop: NE_NAG_SOUND_LOOP($nagIndex),
+                mainLength: NE_NAG_SOUND_MAINLENGTH($nagIndex),
+                preLength: NE_NAG_SOUND_PRELENGTH($nagIndex),
+                state: NE_NAG_SOUND_STATE($nagIndex)
+            );
+            add empty to NE_SoundChannel_needUpdate;
+            broadcast "SoundChannel::clone";
+        }
     }
 
     return 0;
@@ -687,34 +724,37 @@ proc NE_NAG_update {
         if (type == "text") {
             block = NE_NAG_Text_modOrNew(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_TEXT_SIZE;
+        } elif (type == "wait_for_key") {
+            block = NE_NAG_WaitForKey_check(NE_NAG_pointer);
+            if (block == 0) {
+                NE_NAG_pointer += NE_NAG_WAIT_FOR_KEY_SIZE;
+            }
         } elif (type == "image") {
             block = NE_NAG_Image_modOrNew(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_IMAGE_SIZE;
         } elif (type == "layer") {
             block = NE_NAG_Layer_mod(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_LAYER_SIZE;
-        } elif (type == "sound") {
-            block = NE_NAG_Sound_modOrNew(NE_NAG_pointer);
-            NE_NAG_pointer += NE_NAG_SOUND_SIZE;
-        } elif (type == "trans") {
-            block = NE_NAG_PageTransform_new(NE_NAG_pointer);
-            NE_NAG_pointer += NE_NAG_TRANSFORM_SIZE;
         } elif(type == "action") {
             block = NE_NAG_Action_new(NE_NAG_pointer);
             NE_NAG_pointer += NE_NAG_ACTION_SIZE;
-        } elif (type == "wait_for_key") {
-            block = NE_NAG_WaitForKey_check(NE_NAG_pointer);
-            if (block == 0) {
-                NE_NAG_pointer += NE_NAG_WAIT_FOR_KEY_SIZE;
-            }
-        } elif (type == "sound_action") {
-            block = NE_NAG_SoundAction_new(NE_NAG_pointer);
-            NE_NAG_pointer += NE_NAG_SOUND_ACTION_SIZE;
         } elif (type == "wait") {
             block = NE_NAG_Wait_newOrCheck(NE_NAG_pointer);
             if (block == 0) {
                 NE_NAG_pointer += NE_NAG_WAIT_SIZE;
             }
+        } elif (type == "layer_clear") {
+            block = NE_NAG_LayerClear_clear(NE_NAG_pointer);
+            NE_NAG_pointer += NE_NAG_LAYERCLEAR_SIZE;
+        } elif (type == "trans") {
+            block = NE_NAG_PageTransform_new(NE_NAG_pointer);
+            NE_NAG_pointer += NE_NAG_TRANSFORM_SIZE;
+        } elif (type == "sound") {
+            block = NE_NAG_Sound_modOrNew(NE_NAG_pointer);
+            NE_NAG_pointer += NE_NAG_SOUND_SIZE;
+        } elif (type == "sound_action") {
+            block = NE_NAG_SoundAction_new(NE_NAG_pointer);
+            NE_NAG_pointer += NE_NAG_SOUND_ACTION_SIZE;
         }
     }
 }

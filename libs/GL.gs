@@ -85,7 +85,7 @@ proc GL_drawMultiLineTextToStage
     local currentWidth = 0;
     set_pen_size round(sqrt($size) / 2 * ($weight / 800));
     set_pen_color GL_SHADER_COLOR;
-    set_pen_transparency GL_SHADER_ALPHA;
+    set_pen_transparency GL_ALPHA_TRANSFORM(GL_SHADER_ALPHA);
     until i > textLength {
         local char = $text[i];
         local charIndex = Ven_Font_findChar(char);

@@ -36,7 +36,7 @@ onclone {
         }
         set_volume NE_SoundChannel_list[NE_SoundChannel_channelIndex].volume * 100;
     }
-    stop_all_sounds;
+    set_volume 0;
     NE_SoundChannel_list[NE_SoundChannel_channelIndex].state = NE_SOUND_CHANNEL_STATE_STOPPED;
     delete_this_clone;
 }

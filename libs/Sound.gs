@@ -65,9 +65,10 @@ proc NE_SoundChannel_updateAll {
 
 func NE_SoundChannel_findById(id) {
     local i = 1;
-    repeat length(NE_SoundChannel_list) {
-        if (NE_SoundChannel_list[i].id == $id) {
-            return i;
+    repeat length(NE_SoundChannel_needUpdate) {
+        local channelIndex = NE_SoundChannel_needUpdate[i];
+        if (NE_SoundChannel_list[channelIndex].id == $id) {
+            return channelIndex;
         }
         i += 1;
     }
@@ -140,16 +141,17 @@ proc NE_SoundAction_updateAll {
 
             if (t >= 1) {
                 newVolume = action.fromVolume + action.diffVolume;
+                NE_SoundChannel_list[channelIndex].volume = newVolume;
                 delete NE_SoundAction_needUpdate[i];
                 NE_SoundAction_free actionIndex;
-                if (action.isStop and NE_SoundChannel_list[channelIndex].volume == 0) {
+                if (action.isStop and newVolume == 0) {
                     NE_SoundChannel_list[channelIndex].state = NE_SOUND_CHANNEL_STATE_NEEDSTOP;
                 }
             } else {
                 newVolume = action.fromVolume + action.diffVolume * t;
+                NE_SoundChannel_list[channelIndex].volume = newVolume;
                 i += 1;
             }
-            NE_SoundChannel_list[channelIndex].volume = newVolume;
         }
     }
 }

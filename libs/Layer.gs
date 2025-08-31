@@ -209,6 +209,15 @@ proc NE_Layer_removeChildComponent childListIndex, childIndex {
     NE_LinkList_remove $childListIndex, $childIndex;
 }
 
+# 清除子组件列表
+proc NE_Layer_clearChildListByPage layerIndex, page {
+    if ($page == "fore") {
+        NE_Layer_clearChildList NE_Layer_list[$layerIndex].foreChildList;
+    } elif ($page == "back") {
+        NE_Layer_clearChildList NE_Layer_list[$layerIndex].backChildList;
+    }
+} 
+
 func NE_Layer_copyChildList(
     childListIndex,
     newListIndex = -1
@@ -318,6 +327,14 @@ proc NE_Layer_renderLayer layerIndex {
             p = NE_LinkListNode_list[p].next;
         }
         NE_RenderInfo_Stack_pop;
+    }
+}
+
+proc NE_Layer_renderAll {
+    local i = 1;
+    repeat (length(NE_Layer_list)) {
+        NE_Layer_renderLayer i;
+        i++;
     }
 }
 
