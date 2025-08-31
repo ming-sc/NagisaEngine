@@ -654,6 +654,349 @@ proc script_001_scene_005 {
         volume: 1;
 
     setMsgTextAndWait MESSAGE_WITH_QUOTE("你喜欢这所学校吗？");
+
+    showMsgName "朋也";
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("啊…？");
+
+    hideMsgName;
+
+    setMsgTextAndWait "不，她应该不是在问我。";
+
+    setMsgTextAndWait "而是在问心中的某个人。";
+
+    setMsgTextAndWait "他（或是她），会怎么回答呢。";
+
+    showMsgName "女孩";
+
+    NE_NAG_Sound
+        id: "voice",
+        mainStorage: "z0414#00100",
+        mainLength: 3.253,
+        loop: false,
+        volume: 1;
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("我非常非常喜欢。");
+
+    NE_NAG_Sound
+        id: "voice",
+        mainStorage: "z0414#00120",
+        mainLength: 4.545,
+        loop: false,
+        volume: 1;
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("但是，所有的这一切…都在不断改变着。");
+
+    NE_NAG_Sound
+        id: "voice",
+        mainStorage: "z0414#00140",
+        mainLength: 5.007,
+        loop: false,
+        volume: 1;
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("无论是多么快乐的事，多么开心的事，一切…");
+
+    NE_NAG_Sound
+        id: "voice",
+        mainStorage: "z0414#00160",
+        mainLength: 3.130,
+        loop: false,
+        volume: 1;
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("一切，都在不断改变着。");
+
+    hideMsgName;
+
+    setMsgTextAndWait "她自顾自地在说。";
+
+    showMsgName "女孩";
+
+    NE_NAG_Sound
+        id: "voice",
+        mainStorage: "z0414#00180",
+        mainLength: 4.128,
+        loop: false,
+        volume: 1;
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("即使如此，依旧会喜欢上这个地方吗？");
+
+    hideMsgName;
+
+    setMsgTextAndWait "………。";
+
+    showMsgName "女孩";
+
+    NE_NAG_Sound
+        id: "voice",
+        mainStorage: "z0414#00200",
+        mainLength: 0.858,
+        loop: false,
+        volume: 1;
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("我…");
+
+    showMsgName "朋也";
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("去找一个不就好了。");
+
+    hideMsgAndWait;
+
+    NE_NAG_Image
+        id: "fg",
+        layer: fgLayer,
+        page: "back",
+        storage: "FGNG01D";
+
+    NE_NAG_PageTransform
+        layerIndex: fgLayer,
+        time: 1000;
+
+    NE_NAG_Wait
+        time: 1000;
+
+    showMsgName "女孩";
+
+    showMsgAndWait;
+
+    NE_NAG_Sound
+        id: "voice",
+        mainStorage: "z0414#00220",
+        mainLength: 0.475,
+        loop: false,
+        volume: 1;
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("哎…？");
+
+    hideMsgName;
+
+    setMsgTextAndWait "少女吃了一惊，望向我。";
+
+    setMsgTextAndWait "似乎是没料到身旁会有人。";
+
+    showMsgName "朋也";
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("去重新找一个快乐和开心的事不就行了。");
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("能让你觉得快乐和开心的事难道就一个？不可能吧。");
+
+    showMsgName "女孩";
+
+    NE_NAG_Sound
+        id: "voice",
+        mainStorage: "z0414#00240",
+        mainLength: 1.082,
+        loop: false,
+        volume: 1;
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("………");
+
+    hideMsgAndWait;
+
+    NE_NAG_Image
+        id: "fg",
+        layer: fgLayer,
+        page: "back",
+        storage: "FGNG01E";
+
+    NE_NAG_PageTransform
+        layerIndex: fgLayer,
+        time: 1500;
+
+    NE_NAG_Wait
+        time: 1500;
+
+    hideMsgName;
+    
+    showMsgAndWait;
+
+    setMsgTextAndWait "没错。";
+
+    setMsgTextAndWait "对世间一无所知的懵懂时光。";
+
+    setMsgTextAndWait "谁都有过。";
+
+    hideMsgAndWait;
+
+    # 背景坡道
+    NE_NAG_Image
+        id: "bg",
+        layer: bgLayer,
+        page: "fore",
+        storage: "BG011";
+
+    NE_NAG_Action
+        layer: fgLayer,
+        easing: "const",
+        duration: 1800,
+        start: 1, target: 0,
+        relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
+
+    NE_NAG_Wait
+        time: 1800;
+
+    showMsgName "朋也";
+
+    showMsgAndWait;
+
+    setMsgTextAndWait MESSAGE_WITH_QUOTE("好了，该走了。");
+
+    hideMsgAndWait;
+
+    # 两个白底
+    NE_NAG_Image
+        id: "fg",
+        layer: fgLayer,
+        page: "fore",
+        storage: "SIRO";
+
+    NE_NAG_Image
+        id: "fg",
+        layer: fgLayer,
+        page: "back",
+        storage: "SIRO",
+        alpha: 1;
+
+    NE_NAG_Action
+        layer: fgLayer,
+        easing: "const",
+        duration: 2500,
+        start: 0, target: 1,
+        relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
+
+    NE_NAG_Wait
+        time: 3000;
+
+    # 文字图片
+    NE_NAG_Image
+        id: "fg_text_image",
+        layer: fgLayer,
+        page: "fore",
+        storage: "FGMS32_ZH",
+        originWidth: 1280,
+        originHeight: 960,
+        alpha: 0,
+        width: 480,
+        height: 360;
+
+    NE_NAG_Action
+        id: "fg_text_image",
+        layer: fgLayer,
+        page: "fore",
+        easing: "const",
+        duration: 1500,
+        start: 0, target: 1,
+        relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
+
+    NE_NAG_Wait
+        time: 1500 + 2500;
+
+    NE_NAG_Action
+        id: "fg_text_image",
+        layer: fgLayer,
+        page: "fore",
+        easing: "const",
+        duration: 1500,
+        start: 1, target: 0,
+        relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
+
+    NE_NAG_Wait
+        time: 3000;
+
+    NE_NAG_Image
+        id: "fg_text_image",
+        layer: fgLayer,
+        page: "fore",
+        storage: "FGMS33_ZH",
+        alpha: 0;
+    
+    NE_NAG_Action
+        id: "fg_text_image",
+        layer: fgLayer,
+        page: "fore",
+        easing: "const",
+        duration: 1500,
+        start: 0, target: 1,
+        relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
+
+    NE_NAG_Wait
+        time: 1500 + 1800;
+
+    NE_NAG_Image
+        id: "fg_text_image1",
+        layer: fgLayer,
+        page: "fore",
+        storage: "FGMS34_ZH",
+        originWidth: 1280,
+        originHeight: 960,
+        alpha: 0,
+        width: 480,
+        height: 360;
+
+    NE_NAG_Action
+        id: "fg_text_image1",
+        layer: fgLayer,
+        page: "fore",
+        easing: "const",
+        duration: 1500,
+        start: 0, target: 1,
+        relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
+
+    NE_NAG_Wait
+        time: 1500 + 3000;
+
+    NE_NAG_PageTransform
+        layerIndex: fgLayer,
+        time: 2000;
+
+    NE_NAG_Wait
+        time: 3500;
+
+    # 标题
+    NE_NAG_Image
+        id: "fg_text_image",
+        layer: fgLayer,
+        page: "fore",
+        storage: "STT_LB00",
+        originWidth: 480,
+        originHeight: 110,
+        x: 90, y: 120,
+        alpha: 0,
+        width: 300,
+        height: 68.75;
+
+    NE_NAG_Action
+        id: "fg_text_image",
+        layer: fgLayer,
+        page: "fore",
+        easing: "const",
+        duration: 3000,
+        start: 0, target: 1,
+        relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
+
+    NE_NAG_Wait
+        time: 4000;
+
+    NE_NAG_Image
+        id: "fg_text_image1",
+        layer: fgLayer,
+        page: "fore",
+        storage: "STT_LB10",
+        originWidth: 288,
+        originHeight: 56,
+        x: 150, y: 190,
+        alpha: 0,
+        width: 180,
+        height: 35;
+
+    NE_NAG_Action
+        id: "fg_text_image1",
+        layer: fgLayer,
+        page: "fore",
+        easing: "const",
+        duration: 2000,
+        start: 0, target: 1,
+        relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
+
 }
 
 proc script_001 {
@@ -745,9 +1088,9 @@ proc script_001 {
         color: "#FFFFFF",
         alpha: 0;
 
-    # script_001_scene_001;
-    # script_001_scene_002;
-    # script_001_scene_003;
+    script_001_scene_001;
+    script_001_scene_002;
+    script_001_scene_003;
     script_001_scene_004;
     script_001_scene_005;
 }
