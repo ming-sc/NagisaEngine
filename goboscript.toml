@@ -1,1 +1,5 @@
 # Configuration Reference: <https://aspizu.github.io/goboscript/configuration>
+
+layers = ["main", "SoundManager"]
+
+high_quality_pen = true

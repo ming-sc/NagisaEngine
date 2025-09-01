@@ -578,7 +578,11 @@ func NE_NAG_Sound_modOrNew(nagIndex) {
 
     local channelIndex = NE_SoundChannel_findById(id);
 
-    if (channelIndex != NE_SOUND_CHANNEL_NULL) {
+    local state = NE_SoundChannel_list[channelIndex].state;
+
+    # 注意可能因线程问题导致 needUpdate 里有多个同 id 的声音
+    # 具体情况需根据克隆体的底层实现考虑
+    if (channelIndex != NE_SOUND_CHANNEL_NULL and state == NE_SOUND_CHANNEL_STATE_PLAYING) {
         local volume = NE_NAG_SOUND_VOLUME($nagIndex);
         local state = NE_NAG_SOUND_STATE($nagIndex);
 
@@ -659,7 +663,9 @@ func NE_NAG_SoundAction_new(nagIndex) {
     local id = NE_NAG_SOUND_ACTION_ID($nagIndex);
 
     local channelIndex = NE_SoundChannel_findById(id);
-    if (channelIndex != NE_SOUND_CHANNEL_NULL) {
+    # 注意可能因线程问题导致 needUpdate 里有多个同 id 的声音
+    # 具体情况需根据克隆体的底层实现考虑
+    if (channelIndex != NE_SOUND_CHANNEL_NULL and NE_SoundChannel_list[channelIndex].state == NE_SOUND_CHANNEL_STATE_PLAYING) {
         local soundAction = NE_SoundAction_new(
             channelIndex: channelIndex,
             startTime: NE_UTILS_CURRENT_TIME + NE_NAG_SOUND_ACTION_OFFSET($nagIndex),

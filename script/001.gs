@@ -302,10 +302,10 @@ proc script_001_scene_003 {
 
     NE_NAG_PageTransform
         layerIndex: bgLayer,
-        time: 1000;
+        time: 2300;
 
     NE_NAG_Wait
-        time: 1000;
+        time: 2300;
 
     hideMsgName;
     showMsgAndWait;
@@ -827,12 +827,12 @@ proc script_001_scene_005 {
     NE_NAG_Action
         layer: fgLayer,
         easing: "const",
-        duration: 1800,
+        duration: 2300,
         start: 1, target: 0,
         relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
 
     NE_NAG_Wait
-        time: 1800;
+        time: 2300;
 
     showMsgName "朋也";
 
@@ -919,7 +919,7 @@ proc script_001_scene_005 {
         relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
 
     NE_NAG_Wait
-        time: 1500 + 1800;
+        time: 1500 + 1500;
 
     NE_NAG_Image
         id: "fg_text_image1",
@@ -974,7 +974,7 @@ proc script_001_scene_005 {
         relativeIndex: NE_COMPONENT_INFO_ALPHA_INDEX;
 
     NE_NAG_Wait
-        time: 4000;
+        time: 3000;
 
     NE_NAG_Image
         id: "fg_text_image1",
