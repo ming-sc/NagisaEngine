@@ -31,6 +31,11 @@ jobs:
         run: |
           ./goboscript-compiler build
 
+      - name: Create timestamp
+        id: create_timestamp
+        run: echo "timestamp=$(date '+%Y-%m-%d-%H-%M-%S')" >> $GITHUB_OUTPUT
+        shell: bash
+
       - name: Upload sb3 to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
