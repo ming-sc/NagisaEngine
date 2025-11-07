@@ -40,8 +40,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: "*.sb3"
-          tag_name: ${{ github.event_name == 'workflow_dispatch' && format('snapshot-{0}', steps.create_timestamp.outputs.timestamp) || github.event.release.tag_name }}
-          body: ${{ github.event_name == 'workflow_dispatch' && github.event.head_commit.message || github.event.release.body }}
-          prerelease: ${{ github.event_name == 'workflow_dispatch' }}
+          tag_name: ${{ github.event_name != 'release' && format('snapshot-{0}', steps.create_timestamp.outputs.timestamp) || github.event.release.tag_name }}
+          body: ${{ github.event_name != 'release' && github.event.head_commit.message || github.event.release.body }}
+          prerelease: ${{ github.event_name != 'release' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
